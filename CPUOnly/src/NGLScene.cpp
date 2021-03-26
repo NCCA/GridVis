@@ -63,11 +63,15 @@ void NGLScene::initializeGL()
 
 // now to load the shader and set the values
 	// grab an instance of shader manager
-	ngl::ShaderLib::use("nglColourShader");
+	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
+  ngl::ShaderLib::use("PosDir");
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
 	glViewport(0,0,width(),height());
   m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
+  ngl::ShaderLib::use(ngl::nglColourShader);
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+
   startTimer(20);
 }
 
@@ -92,14 +96,15 @@ void NGLScene::paintGL()
   m_mouseGlobalTX.m_m[3][0] = m_modelPos.m_x;
   m_mouseGlobalTX.m_m[3][1] = m_modelPos.m_y;
   m_mouseGlobalTX.m_m[3][2] = m_modelPos.m_z;
-  ngl::ShaderLib::use("nglColourShader");
-
+  ngl::ShaderLib::use("PosDir");
   ngl::Mat4 MVP;
   MVP=m_project*m_view*m_mouseGlobalTX;
 
   ngl::ShaderLib::setUniform("MVP",MVP);
   glPointSize(20);
   m_grid->draw();
+  ngl::ShaderLib::use(ngl::nglColourShader);
+  ngl::ShaderLib::setUniform("MVP",MVP);
   ngl::VAOPrimitives::draw("lineGrid");
 
 }

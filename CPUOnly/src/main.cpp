@@ -17,9 +17,9 @@ int main(int argc, char **argv)
   parser.setApplicationDescription("Grid Based simulations");
  
   parser.addOptions({
-    { {"h", "height"},"set height","height","10" },
-    { {"w", "width"},"set width","width","10" },
-    { {"n", "numParticles"},"set numParticles","numParticles","100" }
+    { {"h", "height"},"set height","height","150" },
+    { {"w", "width"},"set width","width","150" },
+    { {"n", "numParticles"},"set numParticles","numParticles","2000" }
     });
 
   // create an OpenGL format specifier

@@ -8,7 +8,9 @@ struct Particle
     Particle(ngl::Vec3 _pos, ngl::Vec3 _dir) : pos{_pos},dir{_dir}{}
     ngl::Vec3 pos;
     ngl::Vec3 dir;
-
+    ngl::Vec3 next;
+    float acceleration;
+    float maxspeed=1.0f;
 };
 
 #endif

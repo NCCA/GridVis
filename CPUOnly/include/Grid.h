@@ -13,6 +13,7 @@ class Grid
 
     private :
         void initGrid();
+        void resetParticle(Particle &io_p);
         uint32_t m_width;
         uint32_t m_height;
         std::vector<Particle> m_particles;
