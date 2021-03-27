@@ -5,6 +5,7 @@
 #include <ngl/Vec3.h>
 #include "WindowParams.h"
 #include <QOpenGLWindow>
+#include <ngl/Text.h>
 #include <memory>
 #include "Grid.h"
 
@@ -104,6 +105,13 @@ private:
     uint32_t m_gridWidth;
     uint32_t m_gridHeight;
     uint32_t m_numParticles;
+    //----------------------------------------------------------------------------------------------------------------------
+    /// @brief text renderer
+    //----------------------------------------------------------------------------------------------------------------------
+    std::unique_ptr<ngl::Text> m_text;
+    long m_updateTime;
+
+
 
 };
 

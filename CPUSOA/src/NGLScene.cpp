@@ -35,6 +35,8 @@ void NGLScene::resizeGL( int _w, int _h )
   m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
+  m_text->setScreenSize(_w,_h);
+
 }
 
 
@@ -73,6 +75,8 @@ void NGLScene::initializeGL()
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  m_text=std::make_unique<ngl::Text>("fonts/Arial.ttf",18);
+  m_text->setColour(1.0f,1.0f,0.0f);
 
   startTimer(20);
 }
@@ -108,7 +112,12 @@ void NGLScene::paintGL()
 
   m_grid->draw();
   auto drawend = std::chrono::steady_clock::now();
-  ngl::msg->addMessage(fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count()));
+  
+  std::string text=fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count());
+  m_text->renderText(10,680,text );
+  text=fmt::format("Update took {0} uS",m_updateTime);
+  m_text->renderText(10,660,text );
+  
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("MVP",MVP);
   ngl::VAOPrimitives::draw("lineGrid");
@@ -231,7 +240,8 @@ void NGLScene::timerEvent(QTimerEvent *)
   auto updatebegin = std::chrono::steady_clock::now();
   m_grid->update(0.01f);
   auto updateend = std::chrono::steady_clock::now();
-  ngl::msg->addMessage(fmt::format("Update took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count()));
+  //ngl::msg->addMessage(fmt::format("Update took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count()));
+  m_updateTime=std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count();
 
 
   update();
