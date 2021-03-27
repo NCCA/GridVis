@@ -13,6 +13,17 @@ All demos take the following command line options
 -n [int] The number of particles default 2000
 ```
 
+## Analysis of programs
+
+## [CPUOnly](CPUOnly/)
+
+This is the simplest implementation and it uses an array of structures for the data layout. It's not particularly quick and the draw function takes longer than the update (this is due to copying the data to a suitable format for OpenGL).
+
+## [CPUSOA](CPUSOA)
+
+
+
+
 
 ## References
 
