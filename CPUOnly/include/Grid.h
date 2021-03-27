@@ -4,13 +4,14 @@
 #include <cstdint>
 #include "Particle.h"
 #include <ngl/AbstractVAO.h>
+
+
 class Grid
 {
     public :
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
         void draw() const;
         void update(float _dt);
-
     private :
         void initGrid();
         void resetParticle(Particle &io_p);

@@ -10,6 +10,5 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE AND DEFINED ENV{CMAKE_TOOLCHAIN_FILE})
 endif()
 
 project(GridVisBuildALL)
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/CPUOnly/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/CPUSOA/ )

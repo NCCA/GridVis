@@ -36,10 +36,9 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
 			${PROJECT_SOURCE_DIR}/src/Grid.cpp  
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
-            ${PROJECT_SOURCE_DIR}/include/Grid.h 
-                        
+            ${PROJECT_SOURCE_DIR}/include/Grid.h             
 )
-
+add_compile_definitions(GL_SILENCE_DEPRECATION)
 target_link_libraries(${TargetName} PRIVATE  NGL Qt5::Widgets)
 
 add_custom_target(${TargetName}CopyShaders ALL

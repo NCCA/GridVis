@@ -10,6 +10,8 @@ class Grid
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
         void draw() const;
         void update(float _dt);
+        enum class DrawMode{SINGLEBUFFER,MULTIBUFFER};
+        void toggleDrawMode(DrawMode _mode);
 
     private :
         void initGrid();
@@ -18,10 +20,14 @@ class Grid
         uint32_t m_height;
         uint32_t m_numParticles;
         std::unique_ptr<ngl::AbstractVAO> m_vao;
+        GLuint m_svao;
+        GLuint m_vboID;
         std::vector<ngl::Vec3> m_pos;
         std::vector<ngl::Vec3> m_dir;
         std::vector<float> m_acceleration;
         std::vector<float> m_maxspeed;
+        DrawMode m_drawMode=DrawMode::SINGLEBUFFER;
+
 
 
 };

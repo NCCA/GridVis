@@ -214,6 +214,11 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_F : showFullScreen(); break;
   // show windowed
   case Qt::Key_N : showNormal(); break;
+
+  case Qt::Key_1 : m_grid->toggleDrawMode(Grid::DrawMode::SINGLEBUFFER); break;
+  case Qt::Key_2 : m_grid->toggleDrawMode(Grid::DrawMode::MULTIBUFFER); break;
+  
+
   default : break;
   }
   // finally update the GLWindow and re-draw

@@ -4,6 +4,8 @@
 #include <ngl/NGLStream.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/MultiBufferVAO.h>
+#include <ngl/SimpleVAO.h>
+
 
 Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles) 
 {
@@ -16,25 +18,61 @@ Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles)
     m_maxspeed.resize(m_numParticles);
     initGrid();
     m_vao=ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS);
-  }
+    // Going to use a non NGL buffer see if it is quicker
+    
+    glGenVertexArrays(1, &m_svao);
+    glBindVertexArray(m_svao);
+    glGenBuffers(1, &m_vboID);
+    // now bind this to the VBO buffer
+    glBindBuffer(GL_ARRAY_BUFFER, m_vboID);
+    // allocate the buffer data we need two lots of vec3 one for pos one for dir use dynamic as we update
+    // per frame and it may be quicker
+    glBufferData(GL_ARRAY_BUFFER, (m_numParticles*2)*sizeof(ngl::Vec3), 0, GL_DYNAMIC_DRAW);
+    // As we are using glBufferSubData later we can set these now and it will be the same.
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+    // The dir vec3 is going to be put at the end of the pos block
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<float *>(m_numParticles*sizeof(ngl::Vec3)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
+}
+
+void Grid::toggleDrawMode(DrawMode _mode)
+{
+  m_drawMode=_mode;
+}
 
 void Grid::draw() const
 {
-  
-  m_vao->bind();
+  if (m_drawMode == DrawMode::MULTIBUFFER)
+  {
+    m_vao->bind();
+    // in this case we are going to set our data as the vertices above
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_pos.size()*sizeof(ngl::Vec3),m_pos[0].m_x));
+    // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
+    m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_dir.size()*sizeof(ngl::Vec3),m_dir[0].m_x));
+    m_vao->setVertexAttributePointer(1,3,GL_FLOAT,0,0);
+    m_vao->setNumIndices(m_numParticles);
 
-  // in this case we are going to set our data as the vertices above
-  m_vao->setData(ngl::MultiBufferVAO::VertexData(m_pos.size()*sizeof(ngl::Vec3),m_pos[0].m_x));
-  // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
-  m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
-  m_vao->setData(ngl::MultiBufferVAO::VertexData(m_dir.size()*sizeof(ngl::Vec3),m_dir[0].m_x));
-  m_vao->setVertexAttributePointer(1,3,GL_FLOAT,0,0);
-  m_vao->setNumIndices(m_numParticles);
-
- // now unbind
-  m_vao->draw();
-  m_vao->unbind();
-
+  // now unbind
+    m_vao->draw();
+    m_vao->unbind();
+  }
+  else
+  {
+      glBindVertexArray(m_svao);
+      // bind the buffer to copy the data
+      glBindBuffer(GL_ARRAY_BUFFER,m_vboID);
+      // copy the pos data
+      glBufferSubData(GL_ARRAY_BUFFER,0,m_numParticles*sizeof(ngl::Vec3),&m_pos[0].m_x);
+      // concatinate the dir data
+      glBufferSubData(GL_ARRAY_BUFFER,m_numParticles*sizeof(ngl::Vec3),m_numParticles*sizeof(ngl::Vec3),&m_dir[0].m_x);      
+      // draw
+      glDrawArrays(GL_POINTS,0,m_numParticles);      
+      glBindVertexArray(0);
+  }
 }
 void Grid::update(float _dt)
 {
