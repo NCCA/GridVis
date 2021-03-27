@@ -18,6 +18,16 @@ Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles)
     m_maxspeed.resize(m_numParticles);
     initGrid();
     m_vao=ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS);
+    m_vao->bind();
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_pos.size()*sizeof(ngl::Vec3),m_pos[0].m_x));
+    m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_dir.size()*sizeof(ngl::Vec3),m_dir[0].m_x));
+    m_vao->setVertexAttributePointer(1,3,GL_FLOAT,0,0);
+    m_vao->setNumIndices(m_numParticles);
+    m_vao->unbind();
+
+
+
     // Going to use a non NGL buffer see if it is quicker
     
     glGenVertexArrays(1, &m_svao);
@@ -48,13 +58,14 @@ void Grid::draw() const
   if (m_drawMode == DrawMode::MULTIBUFFER)
   {
     m_vao->bind();
-    // in this case we are going to set our data as the vertices above
-    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_pos.size()*sizeof(ngl::Vec3),m_pos[0].m_x));
-    // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
-    m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
-    m_vao->setData(ngl::MultiBufferVAO::VertexData(m_dir.size()*sizeof(ngl::Vec3),m_dir[0].m_x));
-    m_vao->setVertexAttributePointer(1,3,GL_FLOAT,0,0);
-    m_vao->setNumIndices(m_numParticles);
+    // going to get a pointer to the data and update using memcpy
+    auto ptr=m_vao->mapBuffer(0,GL_READ_WRITE);
+    memcpy(ptr,&m_pos[0].m_x,m_pos.size()*sizeof(ngl::Vec3));
+    m_vao->unmapBuffer();
+
+    ptr=m_vao->mapBuffer(1,GL_READ_WRITE);
+    memcpy(ptr,&m_dir[0].m_x,m_dir.size()*sizeof(ngl::Vec3));
+    m_vao->unmapBuffer();
 
   // now unbind
     m_vao->draw();
