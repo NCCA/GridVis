@@ -79,25 +79,24 @@ void Grid::updateParticle(size_t i, float _dt)
 
 void Grid::update(float _dt)
 {
-  std::mutex critical;
   // implement an OpenMP paralell for loop (as mac doesn support omp)
+  // based on this https://www.alecjacobson.com/weblog/?p=4544
   for(int t = 0;t<m_nthreads;t++)
   {
-    m_threadPool[t] = std::thread(std::bind(
+    m_threadPool[t] = std::thread(
         [&](const int bi, const int ei, const int t)
         {
           // loop over all items
           for(int i = bi;i<ei;i++)
           {
-            // inner loop
-            {
               updateParticle(i,_dt);
-            }
           }
-        },t*m_numParticles/m_nthreads,(t+1)==m_nthreads?m_numParticles:(t+1)*m_numParticles/m_nthreads,t));
+        },t*m_numParticles/m_nthreads,(t+1)==m_nthreads?m_numParticles:(t+1)*m_numParticles/m_nthreads,t);
     }
-    std::for_each(m_threadPool.begin(),m_threadPool.end(),[](std::thread& x){x.join();});
-
+    for(auto &t : m_threadPool)
+    {
+      t.join();
+    }
   updateTextureBuffer();
 }
 
