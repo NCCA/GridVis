@@ -39,6 +39,9 @@ class Vec3x8
     Vec3x8  operator*(const Vec3x8 &_r) const ;
     Vec3x8  operator*(float _r) const ;
     Vec3x8  operator+(const Vec3x8 &_r) const ;
+    void  operator+=(const Vec3x8 &_r);
+    void clamp(float _min, float _max);
+    
     __m256 x() const {return m_x;}
     __m256 y() const {return m_y;}
     __m256 z() const {return m_z;}
