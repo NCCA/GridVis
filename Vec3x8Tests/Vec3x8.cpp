@@ -14,6 +14,14 @@ Vec3x8::Vec3x8(float _v)
   m_z=_mm256_set1_ps(_v);
 }
 
+Vec3x8::Vec3x8(const ngl::Vec3  &_v)
+{
+  m_x=_mm256_set1_ps(_v.m_x);
+  m_y=_mm256_set1_ps(_v.m_y);
+  m_z=_mm256_set1_ps(_v.m_z);
+}
+
+
 Vec3x8::Vec3x8(__m256 _x, __m256 _y, __m256 _z)
 {
   m_x=_x;
@@ -86,15 +94,36 @@ Vec3x8  operator*(float _r,const Vec3x8 &_rhs)
 
 }
 
-
-
 Vec3x8  Vec3x8::operator+(const Vec3x8 &_r) const 
 {
-
   auto x=_mm256_add_ps(m_x,_r.m_x);
   auto y=_mm256_add_ps(m_y,_r.m_y);
   auto z=_mm256_add_ps(m_z,_r.m_z);
-
   return Vec3x8(x,y,z);
 }
 
+__m256 Vec3x8::dot(const Vec3x8 & _r) const 
+{
+  // 	return m_x * _v.m_x + m_y * _v.m_y + m_z * _v.m_z;
+  auto x=_mm256_mul_ps(m_x,_r.m_x);
+  auto y=_mm256_mul_ps(m_y,_r.m_y);
+  auto z=_mm256_mul_ps(m_z,_r.m_z);
+  auto ret=_mm256_add_ps(x,y);
+  return _mm256_add_ps(ret,z);
+}
+
+Vec3x8  Vec3x8::operator*(__m256 _r) const 
+{
+  auto x=_mm256_mul_ps(m_x,_r);
+  auto y=_mm256_mul_ps(m_y,_r);
+  auto z=_mm256_mul_ps(m_z,_r);
+  return Vec3x8(x,y,z);
+}
+
+Vec3x8 Vec3x8::reflect(const ngl::Vec3 & _r) const 
+{
+// float d=this->dot(_n);
+ //  I - 2.0 * dot(N, I) * N
+// return Vec3( m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z);
+
+}

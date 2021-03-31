@@ -74,6 +74,26 @@ TEST(VEC3x8,multScalar)
     }
 }
 
+TEST(VEC3x8,multScalarVec)
+{
+
+    Vec3x8 a(1.0f);
+    __m256 values=_mm256_setr_ps(0.1f,0.2f,0.3f,0.4f,0.5f,0.6f,0.7f,0.8f);
+
+    auto res=a*values;
+    float inc=0.1f;
+    for(int i=0; i<8; ++i)
+    {
+      EXPECT_FLOAT_EQ(res[i].m_x,inc);
+      EXPECT_FLOAT_EQ(res[i].m_y,inc);
+      EXPECT_FLOAT_EQ(res[i].m_z,inc);
+      inc+=0.1f;
+    }
+
+
+
+}
+
 
 
 TEST(VEC3x8,add)
@@ -90,4 +110,19 @@ TEST(VEC3x8,add)
         auto test=res[i];
         EXPECT_TRUE(test==(a[i]+a[i]));
     }
+}
+
+TEST(Vec3x8,dot)
+{
+  Vec3x8 a(ngl::Vec3(1.0f,2.0f,3.0f));
+  Vec3x8 b(ngl::Vec3(4.0f,5.0f,6.0f));
+  auto res=a.dot(b);
+  // copy the array of 8 floats back should all be 32.0f
+  float dots[8];
+  _mm256_store_ps(static_cast<float *>(dots), res);
+  for(int i=0; i<8; ++i)
+  {
+    EXPECT_FLOAT_EQ(dots[i],32.0f);
+  }
+
 }

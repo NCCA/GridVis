@@ -35,10 +35,15 @@ class Vec3x8
     Vec3x8(const Vec3x8 &)=default;
     Vec3x8(__m256 _x, __m256 _y, __m256 _z);
     Vec3x8(float _v); // set everything to single value
+    Vec3x8(const ngl::Vec3 &_v);
     ngl::Vec3  operator[](size_t _i) const ;
     Vec3x8  operator*(const Vec3x8 &_r) const ;
     Vec3x8  operator*(float _r) const ;
+    Vec3x8  operator*(__m256 _r) const ;
+    
     Vec3x8  operator+(const Vec3x8 &_r) const ;
+    Vec3x8 reflect(const ngl::Vec3 & _r) const;
+    __m256 dot(const Vec3x8 &_r) const ;
     __m256 x() const {return m_x;}
     __m256 y() const {return m_y;}
     __m256 z() const {return m_z;}

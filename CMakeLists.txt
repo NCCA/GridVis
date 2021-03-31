@@ -16,3 +16,5 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/TexelFetch/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/ThreadedUpdate/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/ComputeShaderUpdate/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/Vec3x8Tests/ )
+add_subdirectory(${PROJECT_SOURCE_DIR}/SIMDUpdate/ )
+
