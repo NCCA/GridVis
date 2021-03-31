@@ -122,8 +122,19 @@ Vec3x8  Vec3x8::operator*(__m256 _r) const
 
 Vec3x8 Vec3x8::reflect(const ngl::Vec3 & _r) const 
 {
-// float d=this->dot(_n);
  //  I - 2.0 * dot(N, I) * N
-// return Vec3( m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z);
+  auto d=dot(Vec3x8(_r));
+  //  return Vec3( m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z);
 
+  d=_mm256_mul_ps(_mm256_set1_ps(2.0f),d);
+  auto inx = _mm256_set1_ps(_r.m_x);
+  auto iny = _mm256_set1_ps(_r.m_y);
+  auto inz = _mm256_set1_ps(_r.m_z);
+ 
+  auto x=_mm256_fnmadd_ps(d,inx,m_x);
+  auto y=_mm256_fnmadd_ps(d,iny,m_y);
+  auto z=_mm256_fnmadd_ps(d,inz,m_z);
+  return Vec3x8(x,y,z);
+ 
+ 
 }

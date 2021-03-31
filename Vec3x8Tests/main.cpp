@@ -126,3 +126,22 @@ TEST(Vec3x8,dot)
   }
 
 }
+
+
+TEST(Vec3x8,reflect)
+{
+  Vec3x8 a(ngl::Vec3(0.1f,0.2f,2.0f));
+  ngl::Vec3 na(0.1f,0.2f,2.0f);
+  auto refngl=na.reflect(ngl::Vec3(0.0f,1.0f,0.0f));
+
+  auto ref=a.reflect(ngl::Vec3(0.0f,1.0f,0.0f));
+
+  for(int i=0; i<8; ++i)
+  {
+    auto test=ref[i];
+    EXPECT_FLOAT_EQ(refngl.m_x,test.m_x);
+    EXPECT_FLOAT_EQ(refngl.m_y,test.m_y);
+    EXPECT_FLOAT_EQ(refngl.m_z,test.m_z);
+  }
+
+}
