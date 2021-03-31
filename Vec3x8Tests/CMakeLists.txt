@@ -28,7 +28,12 @@ add_executable(${TargetName})
 find_package(GTest CONFIG REQUIRED)
 include(GoogleTest)
 enable_testing()
-set(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS} "-msse -msse2 -msse3 -mavx2 -mfma -mf16c")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   set(CMAKE_CXX_FLAGS ${CMAKE_C_FLAGS} "-msse -msse2 -msse3 -mavx2 -mfma -mf16c")
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   target_compile_options(${TargetName} PRIVATE /arch:AVX2)
+endif()
+
 # Add NGL include path
 include_directories(include $ENV{HOME}/NGL/include)
 target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/main.cpp  
