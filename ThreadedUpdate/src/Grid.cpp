@@ -7,7 +7,7 @@
 #include <ngl/SimpleVAO.h>
 
 
-Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles) 
+Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles) noexcept
 {
     m_width=_w;
     m_height=_h;
@@ -26,7 +26,7 @@ Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles)
 }
 
 
-void Grid::draw() const
+void Grid::draw() const noexcept
 {
   glActiveTexture( GL_TEXTURE0 );
   glBindTexture(GL_TEXTURE_BUFFER,m_posBufferID);
@@ -37,7 +37,7 @@ void Grid::draw() const
 }
 
 
-void Grid::updateParticle(size_t i, float _dt)
+void Grid::updateParticle(size_t i, float _dt) noexcept
 {
     auto dir=m_dir[i]*ngl::Vec3(m_acceleration[i],0.0f,m_acceleration[i])*_dt;
     m_dir[i].clamp(m_maxspeed[i]);
@@ -77,30 +77,33 @@ void Grid::updateParticle(size_t i, float _dt)
 
 }
 
-void Grid::update(float _dt)
+void Grid::update(float _dt) noexcept
 {
   // implement an OpenMP paralell for loop (as mac doesn support omp)
   // based on this https://www.alecjacobson.com/weblog/?p=4544
+  // first partition work based on the number of threads in our pool.
   for(int t = 0;t<m_nthreads;t++)
   {
     m_threadPool[t] = std::thread(
         [&](const int bi, const int ei, const int t)
         {
-          // loop over all items
+          // this is the work chunk
           for(int i = bi;i<ei;i++)
           {
               updateParticle(i,_dt);
           }
         },t*m_numParticles/m_nthreads,(t+1)==m_nthreads?m_numParticles:(t+1)*m_numParticles/m_nthreads,t);
     }
+    // Now run the threads by using join. 
     for(auto &t : m_threadPool)
     {
       t.join();
     }
+  // finally load into the texture buffer
   updateTextureBuffer();
 }
 
-void Grid::resetParticle(size_t i)
+void Grid::resetParticle(size_t i) noexcept
 {
     m_pos[i].m_x=ngl::Random::randomNumber(m_width/2.0f);
     m_pos[i].m_z=ngl::Random::randomNumber(m_height/2.0f);
@@ -111,7 +114,7 @@ void Grid::resetParticle(size_t i)
     m_acceleration[i]=ngl::Random::randomPositiveNumber(5)+0.1f;
 }
 
-void Grid::initGrid()
+void Grid::initGrid() noexcept
 {
   for(size_t i=0; i<m_numParticles; ++i)
   {
@@ -121,7 +124,7 @@ void Grid::initGrid()
 
 
 
-void Grid::createTextureBuffer()
+void Grid::createTextureBuffer() noexcept
 {
   // now generate a buffer and copy this data to it
   // we will update this every frame with new values.
@@ -151,7 +154,7 @@ void Grid::createTextureBuffer()
 }
 
 
-void Grid::updateTextureBuffer()
+void Grid::updateTextureBuffer() noexcept
 {
   // update this buffer by copying the data to it
   glActiveTexture( GL_TEXTURE0 );
