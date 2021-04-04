@@ -1,27 +1,37 @@
-# TexelFetch
+# Threaded Update
 
-This demo put both position and direction values in a TextureBuffer and updates the values each frame.
+This demo is an extension of the Texel Fetch demo with an effort to use threads to update the particles. As this is an [Embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel) algorithm it is easy to thread.
 
-A VAO is created but no data / buffers are associated with it so when draw is called the vertex shader is executed without vertex attributes being passed.
+It would be easy to do this using OpenMP parallel for loops however not supported under mac so I have used a simple thread pool. 
 
-The Vertex shader uses texelFetch to read the data from the bound texture buffers containing float32f values.
+We create a std::vector<std::thread> on construction of the grid class with the number of cores we have free (8 on my mac). We then partition the work load into chunks and have a thread for each update as follows.
 
 ```
-#version 400 core
-
-uniform mat4 MVP;
-flat out vec3 dir;
-uniform samplerBuffer posSampler;
-uniform samplerBuffer dirSampler;
-
-void main()
+void Grid::update(float _dt)
 {
-    vec3 inPos=texelFetch(posSampler,gl_VertexID).xyz;
-    vec3 inDir=texelFetch(dirSampler,gl_VertexID).xyz;
-    gl_Position=MVP*vec4(inPos,1.0);
-    dir=vec3(MVP*vec4(inDir,0));
+  // implement an OpenMP paralell for loop (as mac doesn support omp)
+  for(int t = 0;t<m_nthreads;t++)
+  {
+    m_threadPool[t] = std::thread(std::bind(
+        [&](const int bi, const int ei, const int t)
+        {
+          // loop over all items
+          for(int i = bi;i<ei;i++)
+          {
+            // inner loop
+            {
+              updateParticle(i,_dt);
+            }
+          }
+        },t*m_numParticles/m_nthreads,(t+1)==m_nthreads?m_numParticles:(t+1)*m_numParticles/m_nthreads,t));
+    }
+    std::for_each(m_threadPool.begin(),m_threadPool.end(),[](std::thread& x){x.join();});
+
+  updateTextureBuffer();
 }
+
 ```
+
 
 ## Command line Options.
 
