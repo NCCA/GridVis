@@ -11,6 +11,8 @@
 #include <ngl/Random.h>
 #include <chrono>
 #include <fmt/format.h>
+#include <numeric>
+constexpr size_t c_sampleSize=500;
 
 
 NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
@@ -19,7 +21,8 @@ NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
   m_gridWidth=_w;
   m_gridHeight=_h;
   m_numParticles=_numParticles;
-
+  // we need to add an initial value to the rolling average to make code simpler
+  m_updateTime.push_back(1);
 }
 
 
@@ -115,10 +118,10 @@ void NGLScene::paintGL()
 
   m_grid->draw();
   auto drawend = std::chrono::steady_clock::now();
-  
   std::string text=fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count());
   m_text->renderText(10,680,text );
-  text=fmt::format("Update took {0} uS",m_updateTime);
+  auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
+  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_numParticles);
   m_text->renderText(10,660,text );
   
   ngl::ShaderLib::use(ngl::nglColourShader);
@@ -241,9 +244,13 @@ void NGLScene::timerEvent(QTimerEvent *)
   auto updatebegin = std::chrono::steady_clock::now();
   m_grid->update(0.01f);
   auto updateend = std::chrono::steady_clock::now();
-  //ngl::msg->addMessage(fmt::format("Update took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count()));
-  m_updateTime=std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count();
+  // add to the rolling average
+  m_updateTime.push_back(std::chrono::duration_cast<std::chrono::microseconds> (updateend - updatebegin).count());
+  // if greater than sample size remove front element
 
-
+  if(m_updateTime.size() > c_sampleSize)
+  {
+    m_updateTime.pop_front();
+  }
   update();
 }

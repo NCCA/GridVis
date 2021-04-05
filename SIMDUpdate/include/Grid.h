@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <ngl/AbstractVAO.h>
 #include <ngl/Vec3.h>
+#include "Vec3x8.h"
 class Grid
 {
     public :
@@ -25,10 +26,10 @@ class Grid
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
         GLuint m_vboID;
-        std::vector<ngl::Vec3> m_pos;
-        std::vector<ngl::Vec3> m_dir;
-        std::vector<float> m_acceleration;
-        std::vector<float> m_maxspeed;
+        std::vector<Vec3x8> m_pos;
+        std::vector<Vec3x8> m_dir;
+        std::vector<__m256> m_acceleration; // float[8]
+        std::vector<__m256> m_maxspeed; // float [8]
 
 
 

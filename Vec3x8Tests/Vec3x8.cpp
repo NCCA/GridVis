@@ -29,7 +29,12 @@ Vec3x8::Vec3x8(__m256 _x, __m256 _y, __m256 _z)
   m_z=_z;
 }
 
-
+void Vec3x8::set(__m256 _x, __m256 _y, __m256 _z)
+{
+  m_x=_x;
+  m_y=_y;
+  m_z=_z;
+}
 
 Vec3x8::Vec3x8(ngl::Vec3 _v[8])
 {
