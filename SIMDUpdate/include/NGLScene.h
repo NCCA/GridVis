@@ -8,6 +8,8 @@
 #include <ngl/Text.h>
 #include <memory>
 #include "Grid.h"
+#include <deque>
+
 
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
@@ -109,7 +111,8 @@ private:
     /// @brief text renderer
     //----------------------------------------------------------------------------------------------------------------------
     std::unique_ptr<ngl::Text> m_text;
-    long m_updateTime;
+    std::deque<long> m_updateTime;
+
 
 
 
