@@ -15,6 +15,8 @@ class Grid
     private :
         void initGrid();
         void resetParticle(size_t i);
+        void updateParticle(size_t _i,float _dt) noexcept;
+
         void createTextureBuffer();
         void updateTextureBuffer();
         GLuint m_tbo[2];

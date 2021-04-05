@@ -23,7 +23,7 @@ find_package(NGL CONFIG REQUIRED)
 set(CMAKE_AUTOMOC ON)
 # find Qt libs
 find_package(Qt5Widgets)
-find_package(Qt5Concurrent)
+find_package(TBB CONFIG REQUIRED)
 # use C++ 17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -47,7 +47,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
             ${PROJECT_SOURCE_DIR}/include/Vec3x8.h             
 )
 add_compile_definitions(GL_SILENCE_DEPRECATION)
-target_link_libraries(${TargetName} PRIVATE  NGL Qt5::Widgets)
+target_link_libraries(${TargetName} PRIVATE  NGL Qt5::Widgets TBB::tbb)
 
 add_custom_target(${TargetName}CopyShaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory

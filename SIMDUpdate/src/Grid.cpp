@@ -5,6 +5,8 @@
 #include <ngl/VAOFactory.h>
 #include <ngl/MultiBufferVAO.h>
 #include <ngl/SimpleVAO.h>
+#include <tbb/parallel_for.h>
+
 
 unsigned int roundTo(unsigned int value, unsigned int roundTo)
 {
@@ -38,10 +40,10 @@ void Grid::draw() const
   glBindVertexArray(m_svao);
   glDrawArrays(GL_POINTS,0,m_numParticles);      
 }
-void Grid::update(float _dt)
+
+
+void Grid::updateParticle(size_t i, float _dt) noexcept
 {
-  for(size_t i=0; i<m_numParticles; ++i)
-  {
     const __m256 zeros=_mm256_setzero_ps();
     auto dir=m_dir[i]*Vec3x8(m_acceleration[i],zeros,m_acceleration[i])*_dt;
     m_dir[i].clamp(0,2.0f); //zeros,m_maxspeed[i]);
@@ -78,7 +80,21 @@ void Grid::update(float _dt)
     //   m_dir[i]= m_dir[i].reflect({0.0f,0.0f,-1.0f});
     //   m_maxspeed[i]-=0.1f;
     // }
-  }
+
+}
+
+void Grid::update(float _dt)
+{
+
+tbb::parallel_for( tbb::blocked_range<int>(0,m_numParticles),
+                       [&](tbb::blocked_range<int> r)
+                       {
+                          for (int i=r.begin(); i<r.end(); ++i)
+                          {
+                             updateParticle(i,_dt);
+                          }
+                       });
+
   updateTextureBuffer();
 }
 
