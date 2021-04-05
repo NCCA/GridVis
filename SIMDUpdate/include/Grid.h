@@ -16,6 +16,8 @@ class Grid
         void initGrid();
         void resetParticle(size_t i);
         void updateParticle(size_t _i,float _dt) noexcept;
+        void checkForReset(size_t _i) noexcept;
+
 
         void createTextureBuffer();
         void updateTextureBuffer();
@@ -30,6 +32,8 @@ class Grid
         GLuint m_vboID;
         std::vector<Vec3x8> m_pos;
         std::vector<Vec3x8> m_dir;
+        std::vector<ngl::Vec3> m_posBuffer;
+        std::vector<ngl::Vec3> m_dirBuffer;
         std::vector<__m256> m_acceleration; // float[8]
         std::vector<__m256> m_maxspeed; // float [8]
 

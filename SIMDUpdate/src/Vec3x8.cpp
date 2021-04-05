@@ -124,6 +124,19 @@ void Vec3x8::clamp(float _min, float _max)
 
 }
 
+void Vec3x8::clamp(__m256 _range)
+{
+  auto min = _mm256_sub_ps(_mm256_set1_ps(0.0f), _range);
+  m_x=_mm256_max_ps(m_x,min);
+  m_y=_mm256_max_ps(m_y,min);
+  m_z=_mm256_max_ps(m_z,min);
+  
+  m_x=_mm256_min_ps(m_x,_range);
+  m_y=_mm256_min_ps(m_y,_range);
+  m_z=_mm256_min_ps(m_z,_range);
+
+}
+
 
 Vec3x8  Vec3x8::operator+(const Vec3x8 &_r) const 
 {

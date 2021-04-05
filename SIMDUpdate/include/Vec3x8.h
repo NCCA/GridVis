@@ -50,6 +50,8 @@ class Vec3x8
     __m256 dot(const Vec3x8 &_r) const ;
     void  operator+=(const Vec3x8 &_r);
     void clamp(float _min, float _max);
+    // clamp to +/- this value in the simd register
+    void clamp(__m256 _value);
     
     __m256 x() const {return m_x;}
     __m256 y() const {return m_y;}
