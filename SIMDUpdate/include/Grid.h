@@ -17,7 +17,7 @@ class Grid
         void resetParticle(size_t i);
         void updateParticle(size_t _i,float _dt) noexcept;
         void checkForReset(size_t _i) noexcept;
-
+        void checkForBounds(size_t _i) noexcept;
 
         void createTextureBuffer();
         void updateTextureBuffer();
