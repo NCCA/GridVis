@@ -40,7 +40,7 @@
     glActiveTexture( GL_TEXTURE1 );
     glBindTexture(GL_TEXTURE_BUFFER,m_dirBufferID);
     glBindVertexArray(m_svao);
-    glDrawArrays(GL_POINTS,0,m_numParticles);      
+    glDrawArrays(GL_POINTS,0,m_numParticles*8);      
   }
 
   void Grid::checkForReset(size_t _i) noexcept
@@ -105,24 +105,61 @@ void Grid::checkForBounds(size_t _i) noexcept
 {
   float xsize=m_width/2.0f;
   float zsize=m_height/2.0f;
+  const __m256 zero = _mm256_setzero_ps();
 
   const __m256 minusXSize=_mm256_set1_ps(-xsize);
   const __m256 plusXSize=_mm256_set1_ps(xsize);
   const __m256 minusZSize=_mm256_set1_ps(-zsize);
   const __m256 plusZSize=_mm256_set1_ps(zsize);
 
+  float xValues[8];
+  float zValues[8];
+  float speed[8];
+  // grab the values from dir and speed
+  _mm256_store_ps(static_cast<float *>(xValues), m_dir[_i].x());
+  _mm256_store_ps(static_cast<float *>(zValues), m_dir[_i].z());
+  _mm256_store_ps(static_cast<float *>(speed), m_maxspeed[_i]);
+
   auto cmp=_mm256_cmp_ps(m_pos[_i].x(),minusXSize,_CMP_LE_OS);
   auto mask=_mm256_movemask_ps(cmp);
+
   if(mask !=0)
   {
-    std::cout<<"Need -x reflect \n";
+  std::bitset<8> setLanes(mask);
+   for(size_t i=0; i<setLanes.size(); ++i)
+   {
+     if(setLanes[i])
+     {
+       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
+       dir= dir.reflect({1.0f,0.0f,0.0f});
+       xValues[i]=dir.m_x;
+       zValues[i]=dir.m_z;
+       speed[i]-=0.1f;
+     }
+   }
+   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
+   m_maxspeed[_i]=_mm256_load_ps(speed);
   }
 
   cmp=_mm256_cmp_ps(m_pos[_i].x(),plusXSize,_CMP_GE_OS);
   mask=_mm256_movemask_ps(cmp);
   if(mask !=0)
   {
-    std::cout<<"Need x reflect\n";
+    std::bitset<8> setLanes(mask);
+   for(size_t i=0; i<setLanes.size(); ++i)
+   {
+     if(setLanes[i])
+     {
+       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
+       dir= dir.reflect({-1.0f,0.0f,0.0f});
+       xValues[i]=dir.m_x;
+       zValues[i]=dir.m_z;
+       speed[i]-=0.1f;
+     }
+   }
+   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
+   m_maxspeed[_i]=_mm256_load_ps(speed);
+
   }
 
 
@@ -132,45 +169,43 @@ void Grid::checkForBounds(size_t _i) noexcept
   mask=_mm256_movemask_ps(cmp);
   if(mask !=0)
   {
-    std::cout<<"Need Z reflect\n";
+  std::bitset<8> setLanes(mask);
+   for(size_t i=0; i<setLanes.size(); ++i)
+   {
+     if(setLanes[i])
+     {
+       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
+       dir= dir.reflect({0.0f,0.0f,1.0f});
+       xValues[i]=dir.m_x;
+       zValues[i]=dir.m_z;
+       speed[i]-=0.1f;
+     }
+   }
+   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
+   m_maxspeed[_i]=_mm256_load_ps(speed);
   }
 
   cmp=_mm256_cmp_ps(m_pos[_i].z(),minusZSize,_CMP_LE_OS);
   mask=_mm256_movemask_ps(cmp);
   if(mask !=0)
   {
-    std::cout<<"Need -Z reflect\n";
+  std::bitset<8> setLanes(mask);
+   for(size_t i=0; i<setLanes.size(); ++i)
+   {
+     if(setLanes[i])
+     {
+       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
+       dir= dir.reflect({0.0f,0.0f,-1.0f});
+       xValues[i]=dir.m_x;
+       zValues[i]=dir.m_z;
+       speed[i]-=0.1f;
+     }
+   }
+   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
+   m_maxspeed[_i]=_mm256_load_ps(speed);
   }
 
 
-
-
-  // Now check against the bounds of the grid and reflect if needed this is quite brute force but works
-  // left plane
-  
-      // if(m_pos[i].m_x <= -xsize)
-      // {
-      //   m_dir[i]= m_dir[i].reflect({1.0f,0.0f,0.0f});
-      //   m_maxspeed[i]-=0.1f;
-      // }
-      // // right plane
-      // else if(m_pos[i].m_x >= xsize)
-      // {
-      //   m_dir[i]= m_dir[i].reflect({-1.0f,0.0f,0.0f});
-      //   m_maxspeed[i]-=0.1f;
-      // }
-      // // top plane
-      // if(m_pos[i].m_z >= zsize)
-      // {
-      //   m_dir[i]= m_dir[i].reflect({0.0f,0.0f,1.0f});
-      //   m_maxspeed[i]-=0.1f;
-      // }
-      // // bottom plane
-      // else if(m_pos[i].m_z <= -zsize)
-      // {
-      //   m_dir[i]= m_dir[i].reflect({0.0f,0.0f,-1.0f});
-      //   m_maxspeed[i]-=0.1f;
-      // }
 
 }
 
@@ -182,8 +217,8 @@ void Grid::checkForBounds(size_t _i) noexcept
       auto dir=m_dir[i]*Vec3x8(m_acceleration[i],zeros,m_acceleration[i])*_dt;
       m_dir[i].clamp(m_maxspeed[i]); 
       m_pos[i] +=dir;
-      __m256 sub=_mm256_set1_ps(0.01f);
-      m_maxspeed[i]=_mm256_sub_ps(m_maxspeed[i],sub);
+      // __m256 sub=_mm256_set1_ps(0.01f);
+      // m_maxspeed[i]=_mm256_sub_ps(m_maxspeed[i],sub);
       checkForReset(i);    
       checkForBounds(i);
 
@@ -193,17 +228,17 @@ void Grid::checkForBounds(size_t _i) noexcept
   void Grid::update(float _dt)
   {
 
-  // tbb::parallel_for( tbb::blocked_range<int>(0,m_numParticles),
-  //                        [&](tbb::blocked_range<int> r)
-  //                        {
-  //                           for (int i=r.begin(); i<r.end(); ++i)
-  //                           {
-  //                              updateParticle(i,_dt);
-  //                           }
-  //                        });
+  tbb::parallel_for( tbb::blocked_range<int>(0,m_numParticles),
+                         [&](tbb::blocked_range<int> r)
+                         {
+                            for (int i=r.begin(); i<r.end(); ++i)
+                            {
+                               updateParticle(i,_dt);
+                            }
+                         });
 
-    for(size_t i=0; i<m_numParticles; ++i)
-      updateParticle(i,_dt);
+    // for(size_t i=0; i<m_numParticles; ++i)
+    //   updateParticle(i,_dt);
 
     updateTextureBuffer();
   }
@@ -261,7 +296,7 @@ void Grid::checkForBounds(size_t _i) noexcept
     glGenBuffers(2,&m_tbo[0]);
 
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
-    glBufferData(GL_TEXTURE_BUFFER, m_pos.size()*sizeof(Vec3x8), 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*8*sizeof(ngl::Vec3), 0, GL_DYNAMIC_DRAW);
     // This buffer is now going to be associated with a texture
     // this will be read in the shader and the index will be from the vertexID
     glGenTextures(1, &m_posBufferID);
@@ -271,7 +306,7 @@ void Grid::checkForBounds(size_t _i) noexcept
 
     
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[1]);
-    glBufferData(GL_TEXTURE_BUFFER, m_dir.size()*sizeof(Vec3x8), 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*8*sizeof(ngl::Vec3), 0, GL_DYNAMIC_DRAW);
     // This buffer is now going to be associated with a texture
     // this will be read in the shader and the index will be from the vertexID
     glGenTextures(1, &m_dirBufferID);
