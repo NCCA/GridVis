@@ -31,7 +31,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Set the name of the executable we want to build
 add_executable(${TargetName})
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-   target_compile_options(${TargetName} PRIVATE -msse -msse2 -msse3 -mavx2 -mavx512f -mavx512vl -mfma -mf16c)
+   target_compile_options(${TargetName} PRIVATE -msse -msse2 -msse3 -mavx2  -mfma -mf16c)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    target_compile_options(${TargetName} PRIVATE /arch:AVX2)
 endif()

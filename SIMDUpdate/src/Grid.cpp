@@ -83,8 +83,8 @@
         {
           x[i]=ngl::Random::randomNumber(m_width/2.0f);
           z[i]=ngl::Random::randomNumber(m_height/2.0f);
-          dirx[i]=ngl::Random::randomPositiveNumber(2.0)+0.1f;
-          dirz[i]=ngl::Random::randomPositiveNumber(2.0f)+0.1f;
+          dirx[i]=ngl::Random::randomNumber(2.0);
+          dirz[i]=ngl::Random::randomNumber(2.0f);
           speed[i]=ngl::Random::randomPositiveNumber(5.0f)+0.1f;
           acceleration[i]=ngl::Random::randomPositiveNumber(5.0f)+0.1f;
         }
@@ -130,10 +130,11 @@ void Grid::checkForBounds(size_t _i) noexcept
    {
      if(setLanes[i])
      {
-       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
-       dir= dir.reflect({1.0f,0.0f,0.0f});
-       xValues[i]=dir.m_x;
-       zValues[i]=dir.m_z;
+       float dot=1.0f*xValues[i]+0.0f*zValues[i];
+        // hard coded reflect value
+        // m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z
+       xValues[i]=xValues[i]-2.0f*dot*1.0f; //dir.m_x;
+       zValues[i]=zValues[i]-2.0f*dot*0.0f;  //dir.m_z;
        speed[i]-=0.1f;
      }
    }
@@ -150,11 +151,11 @@ void Grid::checkForBounds(size_t _i) noexcept
    {
      if(setLanes[i])
      {
-       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
-       dir= dir.reflect({-1.0f,0.0f,0.0f});
-       xValues[i]=dir.m_x;
-       zValues[i]=dir.m_z;
-       speed[i]-=0.1f;
+       float dot=-1.0f*xValues[i]+0.0f*zValues[i];
+        // hard coded reflect value
+        // m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z
+       xValues[i]=xValues[i]-2.0f*dot*-1.0f; //dir.m_x;
+       zValues[i]=zValues[i]-2.0f*dot*0.0f;  //dir.m_z;
      }
    }
    m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
@@ -174,11 +175,13 @@ void Grid::checkForBounds(size_t _i) noexcept
    {
      if(setLanes[i])
      {
-       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
-       dir= dir.reflect({0.0f,0.0f,1.0f});
-       xValues[i]=dir.m_x;
-       zValues[i]=dir.m_z;
+      float dot=0.0f*xValues[i]+-1.0f*zValues[i];
+        // hard coded reflect value
+        // m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z
+       xValues[i]=xValues[i]-2.0f*dot*0.0f; //dir.m_x;
+       zValues[i]=zValues[i]-2.0f*dot*-1.0f;  //dir.m_z;
        speed[i]-=0.1f;
+
      }
    }
    m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
@@ -194,10 +197,12 @@ void Grid::checkForBounds(size_t _i) noexcept
    {
      if(setLanes[i])
      {
-       ngl::Vec3 dir(xValues[i],0.0f,zValues[i]);
-       dir= dir.reflect({0.0f,0.0f,-1.0f});
-       xValues[i]=dir.m_x;
-       zValues[i]=dir.m_z;
+      float dot=0.0f*xValues[i]+-1.0f*zValues[i];
+        // hard coded reflect value
+        // m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z
+       xValues[i]=xValues[i]-2.0f*dot*0.0f; //dir.m_x;
+       zValues[i]=zValues[i]-2.0f*dot*-1.0f;  //dir.m_z;
+
        speed[i]-=0.1f;
      }
    }
@@ -239,8 +244,6 @@ void Grid::checkForBounds(size_t _i) noexcept
 
     // for(size_t i=0; i<m_numParticles; ++i)
     //   updateParticle(i,_dt);
-
-    updateTextureBuffer();
   }
 
   void Grid::resetParticle(size_t i)
