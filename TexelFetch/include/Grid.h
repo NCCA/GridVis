@@ -10,12 +10,12 @@ class Grid
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
         void draw() const;
         void update(float _dt);
-
+        void updateTextureBuffer();
+        uint32_t getNumParticles() const {return m_numParticles;} 
     private :
         void initGrid();
         void resetParticle(size_t i);
         void createTextureBuffer();
-        void updateTextureBuffer();
         GLuint m_tbo[2];
         GLuint m_posBufferID;
         GLuint m_dirBufferID;

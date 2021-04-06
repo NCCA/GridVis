@@ -7,6 +7,7 @@
 #include <QOpenGLWindow>
 #include <ngl/Text.h>
 #include <memory>
+#include <deque>
 #include "Grid.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -109,7 +110,7 @@ private:
     /// @brief text renderer
     //----------------------------------------------------------------------------------------------------------------------
     std::unique_ptr<ngl::Text> m_text;
-    long m_updateTime;
+    std::deque<long> m_updateTime;
 
 
 

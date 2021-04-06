@@ -14,6 +14,14 @@ All demos take the following command line options
 ```
 
 ## Analysis of programs
+These are the approx times (Mac Book pro 2013) for 100000 (which may get rounded to nearest 8 for SIMD)
+
+CPUOnly Draw 16500 uS Update 6600uS  
+CPU SOA Draw 240uS Update 9150uS  
+Texel Fetch Draw 56uS Buffer Update 300uS Sim Update 9800uS 
+Threaded Update Draw 56uS Buffer Update 300uS Sim Update 2820uS
+TBB Update Draw 56uS Buffer Update 300uS Sim Update 2800uS 
+SIMD Update Draw 62uS Buffer Update 2200uS Sim Update 930uS   
 
 ## [CPUOnly](CPUOnly/)
 

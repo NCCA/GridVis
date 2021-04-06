@@ -11,13 +11,13 @@ class Grid
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles) noexcept;
         void draw() const noexcept;
         void update(float _dt) noexcept;
-
+        void updateTextureBuffer() noexcept;
+        size_t getNumParticles() const {return m_numParticles;}
     private :
         void initGrid() noexcept;
         void resetParticle(size_t _i) noexcept;
         void updateParticle(size_t _i,float _dt) noexcept;
         void createTextureBuffer() noexcept;
-        void updateTextureBuffer() noexcept;
         GLuint m_tbo[2];
         GLuint m_posBufferID;
         GLuint m_dirBufferID;

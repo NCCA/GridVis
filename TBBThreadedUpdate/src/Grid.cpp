@@ -86,8 +86,6 @@ tbb::parallel_for( tbb::blocked_range<int>(0,m_numParticles),
                              updateParticle(i,_dt);
                           }
                        });
-  // finally load into the texture buffer
-  updateTextureBuffer();
 }
 
 void Grid::resetParticle(size_t i) noexcept

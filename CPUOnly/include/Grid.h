@@ -12,6 +12,7 @@ class Grid
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
         void draw() const;
         void update(float _dt);
+        size_t getNumParticles() const {return m_particles.size();}
     private :
         void initGrid();
         void resetParticle(Particle &io_p);

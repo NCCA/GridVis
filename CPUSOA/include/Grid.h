@@ -12,7 +12,7 @@ class Grid
         void update(float _dt);
         enum class DrawMode{SINGLEBUFFER,MULTIBUFFER};
         void toggleDrawMode(DrawMode _mode);
-
+        uint32_t getNumParticles() const {return m_numParticles;}
     private :
         void initGrid();
         void resetParticle(size_t i);

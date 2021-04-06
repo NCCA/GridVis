@@ -17,7 +17,7 @@ constexpr size_t c_sampleSize=500;
 
 NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
 {
-  setTitle("Qt5 Simple NGL Demo");
+  setTitle("Grid Simulation using TBB to do Updated with threads");
   m_gridWidth=_w;
   m_gridHeight=_h;
   m_numParticles=_numParticles;
@@ -114,20 +114,30 @@ void NGLScene::paintGL()
 
   ngl::ShaderLib::setUniform("MVP",MVP);
   glPointSize(20);
+  
+  auto updateTbufferbegin = std::chrono::steady_clock::now();
+  m_grid->updateTextureBuffer();
+  auto updateTbufferEnd = std::chrono::steady_clock::now();
+  
   auto drawbegin = std::chrono::steady_clock::now();
-
+  
   m_grid->draw();
   auto drawend = std::chrono::steady_clock::now();
+  
   std::string text=fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count());
   m_text->renderText(10,680,text );
-  auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
-  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_numParticles);
+ 
+  text=fmt::format("Texture Buffer Update took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (updateTbufferEnd - updateTbufferbegin).count());
   m_text->renderText(10,660,text );
+ 
+ 
+  auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
+  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_grid->getNumParticles());
+  m_text->renderText(10,640,text );
   
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("MVP",MVP);
   ngl::VAOPrimitives::draw("lineGrid");
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------

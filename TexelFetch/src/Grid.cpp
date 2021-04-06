@@ -72,7 +72,6 @@ void Grid::update(float _dt)
       m_maxspeed[i]-=0.1f;
     }
   }
-  updateTextureBuffer();
 }
 
 void Grid::resetParticle(size_t i)

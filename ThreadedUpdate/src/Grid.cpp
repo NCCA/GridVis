@@ -99,8 +99,6 @@ void Grid::update(float _dt) noexcept
     {
       t.join();
     }
-  // finally load into the texture buffer
-  updateTextureBuffer();
 }
 
 void Grid::resetParticle(size_t i) noexcept
