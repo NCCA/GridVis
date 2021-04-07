@@ -73,8 +73,10 @@ void NGLScene::initializeGL()
 	// grab an instance of shader manager
 	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
   ngl::ShaderLib::use("PosDir");
-  ngl::ShaderLib::setUniform("posSampler",0);
-  ngl::ShaderLib::setUniform("dirSampler",1);
+  ngl::ShaderLib::setUniform("posXSampler",0);
+  ngl::ShaderLib::setUniform("posZSampler",1);
+  ngl::ShaderLib::setUniform("dirXSampler",2);
+  ngl::ShaderLib::setUniform("dirZSampler",3);
   
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
 	glViewport(0,0,width(),height());
@@ -114,7 +116,7 @@ void NGLScene::paintGL()
   MVP=m_project*m_view*m_mouseGlobalTX;
 
   ngl::ShaderLib::setUniform("MVP",MVP);
-  glPointSize(8);
+  glPointSize(20);
   
   auto updateTbufferbegin = std::chrono::steady_clock::now();
   m_grid->updateTextureBuffer();
@@ -241,8 +243,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_F : showFullScreen(); break;
   // show windowed
   case Qt::Key_N : showNormal(); break;
-  case Qt::Key_Space : m_update^=true; break;
-
+  case Qt::Key_Space : m_update^=false; break;
   
 
   default : break;

@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <ngl/AbstractVAO.h>
 #include <ngl/Vec3.h>
-#include "Vec3x8.h"
+#include "simd.h"
+#include "AlignedArray.h"
 class Grid
 {
     public :
@@ -22,23 +23,26 @@ class Grid
         void checkForBounds(size_t _i) noexcept;
 
         void createTextureBuffer();
-        GLuint m_tbo[2];
-        GLuint m_posBufferID;
-        GLuint m_dirBufferID;
+
+        GLuint m_tbo[4];
+        GLuint m_posXBufferID;
+        GLuint m_posZBufferID;
+        
+        GLuint m_dirXBufferID;
+        GLuint m_dirZBufferID;
         uint32_t m_width;
         uint32_t m_height;
         uint32_t m_numParticles;
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
         GLuint m_vboID;
-        std::vector<Vec3x8> m_pos;
-        std::vector<Vec3x8> m_dir;
         
-        std::vector<ngl::Vec3> m_posBuffer;
-        std::vector<ngl::Vec3> m_dirBuffer;
-        std::vector<__m256> m_acceleration; // float[8]
-        std::vector<__m256> m_maxspeed; // float [8]
-
+       AlignedArray<f256,32> m_posX;
+       AlignedArray<f256,32> m_posZ;
+       AlignedArray<f256,32> m_dirX;
+       AlignedArray<f256,32> m_dirZ;
+       AlignedArray<f256,32> m_acceleration;
+       AlignedArray<f256,32> m_maxspeed;
 
 
 };

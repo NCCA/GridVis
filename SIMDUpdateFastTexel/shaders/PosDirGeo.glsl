@@ -2,7 +2,7 @@
 layout(points) in;
 layout(line_strip, max_vertices = 2) out;
 
-in vec3 dir[];
+flat in vec3 dir[];
 out vec3 colour;
 
 void main()

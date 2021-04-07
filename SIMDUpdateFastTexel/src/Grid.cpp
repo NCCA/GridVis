@@ -17,18 +17,18 @@
   {
       m_width=_w;
       m_height=_h;
-      m_numParticles=roundTo(_numParticles,8)/8;
-      m_pos.resize(m_numParticles);
-      m_dir.resize(m_numParticles);
-      m_acceleration.resize(m_numParticles);
-      m_maxspeed.resize(m_numParticles);
+      m_numParticles=roundTo((unsigned int)_numParticles,8)/8;
+      //m_posX=std::make_unique<AlignedArray<f256,32>>(m_numParticles);
+      m_posX.reset(m_numParticles);
+      m_posZ.reset(m_numParticles);
+      m_dirX.reset(m_numParticles);
+      m_dirZ.reset(m_numParticles);
+      m_acceleration.reset(m_numParticles);
+      m_maxspeed.reset(m_numParticles);
       initGrid();
       createTextureBuffer();
       // Going to use a non NGL buffer see if it is quicker
       glGenVertexArrays(1, &m_svao);
-      std::cout<<"size of Vec3x8 "<<sizeof(Vec3x8)<<" size of buffer "<<sizeof(Vec3x8)*m_numParticles<<'\n';
-      m_posBuffer.resize(m_numParticles*8);
-      m_dirBuffer.resize(m_numParticles*8);
 
   }
 
@@ -36,18 +36,23 @@
   void Grid::draw() const
   {
     glActiveTexture( GL_TEXTURE0 );
-    glBindTexture(GL_TEXTURE_BUFFER,m_posBufferID);
+    glBindTexture(GL_TEXTURE_BUFFER,m_posXBufferID);
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture(GL_TEXTURE_BUFFER,m_dirBufferID);
+    glBindTexture(GL_TEXTURE_BUFFER,m_posZBufferID);
+
+    glActiveTexture( GL_TEXTURE2 );
+    glBindTexture(GL_TEXTURE_BUFFER,m_dirXBufferID);
+    glActiveTexture( GL_TEXTURE3 );
+    glBindTexture(GL_TEXTURE_BUFFER,m_dirZBufferID);
     glBindVertexArray(m_svao);
     glDrawArrays(GL_POINTS,0,m_numParticles*8);      
   }
 
   void Grid::checkForReset(size_t _i) noexcept
   {
-    const __m256 zero = _mm256_setzero_ps();
-    auto cmp=_mm256_cmp_ps(m_maxspeed[_i],zero,_CMP_LE_OS);
-    auto mask=_mm256_movemask_ps(cmp);
+    const f256 zero = zero8f();
+    auto cmp=cmplteq8f(m_maxspeed[_i],zero);
+    auto mask=movemask8f(cmp);
     if(mask ==0)
       return ; // not to update so return
 
@@ -60,22 +65,18 @@
       // we need to go to non SIMD mode here as we need to access the individual float[] elements
       // first we get the particle properties
       // If we had avx512 we could use _mm256_movemask_ps and create a new Vec3x8 and mask with the old to update.
-      auto xValues=m_pos[_i].x();
-      auto zValues=m_pos[_i].z();
-      auto xDirValues=m_dir[_i].x();
-      auto zDirValues=m_dir[_i].z();
       float x[8];
       float z[8];
       float dirx[8];
       float dirz[8];
-      _mm256_store_ps(static_cast<float *>(x), xValues);
-      _mm256_store_ps(static_cast<float *>(z), zValues);
-      _mm256_store_ps(static_cast<float *>(dirx), xDirValues);
-      _mm256_store_ps(static_cast<float *>(dirz), zDirValues);
       float speed[8];
       float acceleration[8];
-      _mm256_store_ps(static_cast<float *>(speed), m_maxspeed[_i]);
-      _mm256_store_ps(static_cast<float *>(acceleration), m_acceleration[_i]);
+      store8f(x,m_posX[_i]);
+      store8f(z,m_posZ[_i]);
+      store8f(dirx,m_dirX[_i]);
+      store8f(dirz,m_dirZ[_i]);
+      store8f(speed,m_maxspeed[_i]);
+      store8f(acceleration,m_acceleration[_i]);
 
       std::bitset<8> setLanes(mask);
       for(size_t i=0; i<setLanes.size(); ++i)
@@ -91,39 +92,37 @@
         }
       }
     // now reset with modified values
-    auto newX=_mm256_load_ps(x);
-    auto newZ=_mm256_load_ps(z);
-    m_pos[_i].set(newX,zero,newZ);
-    newX=_mm256_load_ps(dirx);
-    newZ=_mm256_load_ps(dirz);
-    m_dir[_i].set(newX,zero,newZ);
-    m_maxspeed[_i]=_mm256_load_ps(speed);
-    m_acceleration[_i]=_mm256_load_ps(acceleration);
+    m_posX[_i]=load8f(x);
+    m_posZ[_i]=load8f(z);
+    m_dirX[_i]=load8f(dirx);
+    m_dirZ[_i]=load8f(dirz);
+    m_maxspeed[_i]=load8f(speed);
+    m_acceleration[_i]=load8f(acceleration);
   }
 }
 
 void Grid::checkForBounds(size_t _i) noexcept
 {
+
   float xsize=m_width/2.0f;
   float zsize=m_height/2.0f;
-  const __m256 zero = _mm256_setzero_ps();
+  const f256 zero = zero8f();
 
-  const __m256 minusXSize=_mm256_set1_ps(-xsize);
-  const __m256 plusXSize=_mm256_set1_ps(xsize);
-  const __m256 minusZSize=_mm256_set1_ps(-zsize);
-  const __m256 plusZSize=_mm256_set1_ps(zsize);
+  const f256 minusXSize=splat8f(-xsize);
+  const f256 plusXSize=splat8f(xsize);
+  const f256 minusZSize=splat8f(-zsize);
+  const f256 plusZSize=splat8f(zsize);
 
   float xValues[8];
   float zValues[8];
   float speed[8];
   // grab the values from dir and speed
-  _mm256_store_ps(static_cast<float *>(xValues), m_dir[_i].x());
-  _mm256_store_ps(static_cast<float *>(zValues), m_dir[_i].z());
-  _mm256_store_ps(static_cast<float *>(speed), m_maxspeed[_i]);
-
-  auto cmp=_mm256_cmp_ps(m_pos[_i].x(),minusXSize,_CMP_LE_OS);
-  auto mask=_mm256_movemask_ps(cmp);
-
+  store8f(xValues, m_dirX[_i]);
+  store8f(zValues, m_dirZ[_i]);
+  store8f(speed, m_maxspeed[_i]);
+  
+  auto cmp=cmplteq8f(m_posX[_i],minusXSize);
+  auto mask=movemask8f(cmp);
   if(mask !=0)
   {
   std::bitset<8> setLanes(mask);
@@ -139,15 +138,16 @@ void Grid::checkForBounds(size_t _i) noexcept
        speed[i]-=0.1f;
      }
    }
-   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
-   m_maxspeed[_i]=_mm256_load_ps(speed);
+   m_dirX[_i]=load8f(xValues);
+   m_dirZ[_i]=load8f(zValues);
+   m_maxspeed[_i]=load8f(speed);
   }
 
-  cmp=_mm256_cmp_ps(m_pos[_i].x(),plusXSize,_CMP_GE_OS);
-  mask=_mm256_movemask_ps(cmp);
+  cmp=cmpgteq8f(m_posX[_i],plusXSize);
+  mask=movemask8f(cmp);
   if(mask !=0)
   {
-    std::bitset<8> setLanes(mask);
+   std::bitset<8> setLanes(mask);
    for(size_t i=0; i<setLanes.size(); ++i)
    {
      if(setLanes[i])
@@ -159,16 +159,16 @@ void Grid::checkForBounds(size_t _i) noexcept
        zValues[i]=zValues[i]-2.0f*dot*0.0f;  //dir.m_z;
      }
    }
-   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
-   m_maxspeed[_i]=_mm256_load_ps(speed);
-
+   m_dirX[_i]=load8f(xValues);
+   m_dirZ[_i]=load8f(zValues);
+   m_maxspeed[_i]=load8f(speed);
   }
-
+  
 
   // // top plane
   // if(m_pos[i].m_z >= zsize)
-  cmp=_mm256_cmp_ps(m_pos[_i].z(),plusZSize,_CMP_GE_OS);
-  mask=_mm256_movemask_ps(cmp);
+  cmp=cmpgteq8f(m_posZ[_i],plusZSize);
+  mask=movemask8f(cmp);
   if(mask !=0)
   {
   std::bitset<8> setLanes(mask);
@@ -182,15 +182,15 @@ void Grid::checkForBounds(size_t _i) noexcept
        xValues[i]=xValues[i]-2.0f*dot*0.0f; //dir.m_x;
        zValues[i]=zValues[i]-2.0f*dot*-1.0f;  //dir.m_z;
        speed[i]-=0.1f;
-
      }
    }
-   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
-   m_maxspeed[_i]=_mm256_load_ps(speed);
+   m_dirX[_i]=load8f(xValues);
+   m_dirZ[_i]=load8f(zValues);
+   m_maxspeed[_i]=load8f(speed);
   }
 
-  cmp=_mm256_cmp_ps(m_pos[_i].z(),minusZSize,_CMP_LE_OS);
-  mask=_mm256_movemask_ps(cmp);
+  cmp=cmplteq8f(m_posZ[_i],minusZSize);
+  mask=movemask8f(cmp);
   if(mask !=0)
   {
   std::bitset<8> setLanes(mask);
@@ -203,32 +203,41 @@ void Grid::checkForBounds(size_t _i) noexcept
         // m_x-2.0f*d*_n.m_x, m_y-2.0f*d*_n.m_y, m_z-2.0f*d*_n.m_z
        xValues[i]=xValues[i]-2.0f*dot*0.0f; //dir.m_x;
        zValues[i]=zValues[i]-2.0f*dot*-1.0f;  //dir.m_z;
-
        speed[i]-=0.1f;
      }
    }
-   m_dir[_i].set(_mm256_load_ps(xValues),zero,_mm256_load_ps(zValues));
-   m_maxspeed[_i]=_mm256_load_ps(speed);
+   m_dirX[_i]=load8f(xValues);
+   m_dirZ[_i]=load8f(zValues);
+   m_maxspeed[_i]=load8f(speed);
   }
-
-
-
 }
 
 
 
   void Grid::updateParticle(size_t _i, float _dt) noexcept
   {
-      const __m256 zeros=_mm256_setzero_ps();
-      auto dir=m_dir[_i]*Vec3x8(m_acceleration[_i],zeros,m_acceleration[_i])*_dt;
-      dir.clamp(m_maxspeed[_i]); 
-      m_pos[_i] +=dir;
-      // __m256 sub=_mm256_set1_ps(0.01f);
-      // m_maxspeed[i]=_mm256_sub_ps(m_maxspeed[i],sub);
+      const f256 zeros=zero8f();
+      f256 dt=splat8f(_dt);
+      // create xdir as accel * _dt
+      f256 dirX=mul8f(m_dirX[_i],mul8f(m_acceleration[_i],dt));
+      f256 dirZ=mul8f(m_dirZ[_i],mul8f(m_acceleration[_i],dt));
+      auto clamp=[](f256 _v, f256 _range)
+      {
+        f256 c;
+        auto min = sub8f(splat8f(0.0f), _range);
+        c=max8f(_v,min);
+        c=min8f(_v,_range);
+        return c;
+      };
+      dirX=clamp(dirX,m_maxspeed[_i]);
+      dirZ=clamp(dirZ,m_maxspeed[_i]);
+      m_posX[_i]=add8f(m_posX[_i],dirX); 
+      m_posZ[_i]=add8f(m_posZ[_i],dirZ); 
+
       checkForReset(_i);    
       checkForBounds(_i);
 
-  
+
   }
 
   void Grid::update(float _dt)
@@ -243,12 +252,11 @@ void Grid::checkForBounds(size_t _i) noexcept
                             }
                          });
 
-    // for(size_t i=0; i<m_numParticles; ++i)
-    //   updateParticle(i,_dt);
   }
 
-  void Grid::resetParticle(size_t i)
+  void Grid::resetParticle(size_t _i)
   {
+
     auto randm256 = [](float range)
     {
       float v[8];
@@ -256,7 +264,7 @@ void Grid::checkForBounds(size_t _i) noexcept
       {
         v[i]=ngl::Random::randomNumber(range);
       }
-      return _mm256_loadu_ps(&v[0]);
+      return loadu8f(&v[0]);
     };
 
     auto randPositivem256 = [](float range)
@@ -266,20 +274,17 @@ void Grid::checkForBounds(size_t _i) noexcept
       {
         v[i]=ngl::Random::randomPositiveNumber(range);
       }
-      return _mm256_loadu_ps(&v[0]);
+      return loadu8f(&v[0]);
     };
+    
+    m_posX[_i]=randm256(m_width/2.0f);
+    m_posZ[_i]=randm256(m_height/2.0f);
+    m_dirX[_i]=randm256(2.0f);
+    m_dirZ[_i]=randm256(2.0f);
 
-      auto x=randm256(m_width/2.0f);
-      auto y=_mm256_setzero_ps();
-      auto z=randm256(m_height/2.0f);
-      m_pos[i].set(x,y,z);
-
-      x=randm256(2.0f);
-      z=randm256(2.0f);
-      m_dir[i].set(x,y,z);
-
-      m_maxspeed[i]=randPositivem256(5);  
-      m_acceleration[i]=randPositivem256(5);  
+    m_maxspeed[_i]=randPositivem256(5);  
+    m_acceleration[_i]=randPositivem256(5);  
+  
   }
 
   void Grid::initGrid()
@@ -296,51 +301,62 @@ void Grid::checkForBounds(size_t _i) noexcept
   {
     // now generate a buffer and copy this data to it
     // we will update this every frame with new values.
-
-    glGenBuffers(2,&m_tbo[0]);
+    // going to have 4 buffers one for each of the params x,z,dirX,dirZ
+    glGenBuffers(4,&m_tbo[0]);
 
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
-    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*8*sizeof(ngl::Vec3), 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), 0, GL_DYNAMIC_DRAW);
     // This buffer is now going to be associated with a texture
     // this will be read in the shader and the index will be from the vertexID
-    glGenTextures(1, &m_posBufferID);
+    glGenTextures(1, &m_posXBufferID);
     glActiveTexture( GL_TEXTURE0 );
-    glBindTexture(GL_TEXTURE_BUFFER,m_posBufferID);
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, m_tbo[0]);
+    glBindTexture(GL_TEXTURE_BUFFER,m_posXBufferID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, m_tbo[0]);
 
-    
+
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[1]);
-    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*8*sizeof(ngl::Vec3), 0, GL_DYNAMIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), 0, GL_DYNAMIC_DRAW);
     // This buffer is now going to be associated with a texture
     // this will be read in the shader and the index will be from the vertexID
-    glGenTextures(1, &m_dirBufferID);
+    glGenTextures(1, &m_posZBufferID);
     glActiveTexture( GL_TEXTURE1 );
-    glBindTexture(GL_TEXTURE_BUFFER,m_dirBufferID);
+    glBindTexture(GL_TEXTURE_BUFFER,m_posZBufferID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, m_tbo[1]);
 
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, m_tbo[1]);
+
+    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[2]);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), 0, GL_DYNAMIC_DRAW);
+    // This buffer is now going to be associated with a texture
+    // this will be read in the shader and the index will be from the vertexID
+    glGenTextures(1, &m_dirXBufferID);
+    glActiveTexture( GL_TEXTURE2 );
+    glBindTexture(GL_TEXTURE_BUFFER,m_dirXBufferID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, m_tbo[2]);
+
+    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[3]);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), 0, GL_DYNAMIC_DRAW);
+    // This buffer is now going to be associated with a texture
+    // this will be read in the shader and the index will be from the vertexID
+    glGenTextures(1, &m_dirZBufferID);
+    glActiveTexture( GL_TEXTURE3 );
+    glBindTexture(GL_TEXTURE_BUFFER,m_dirZBufferID);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, m_tbo[3]);
+
 
   }
 
 
   void Grid::updateTextureBuffer()
   {
-
-    size_t index=0;
-    for(size_t i=0; i<m_numParticles*8; i+=8)
-    {
-      m_pos[index].fillArray(&m_posBuffer[i]);
-      m_dir[index++].fillArray(&m_dirBuffer[i]);
-    }
-
-
     // update this buffer by copying the data to it
-    glActiveTexture( GL_TEXTURE0 );
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
-    glBufferData(GL_TEXTURE_BUFFER, m_posBuffer.size()*sizeof(ngl::Vec3), &m_posBuffer[0].m_x, GL_DYNAMIC_DRAW);
-
-    // update this buffer by copying the data to it
-    glActiveTexture( GL_TEXTURE1 );
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), &m_posX[0], GL_DYNAMIC_DRAW);
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[1]);
-    glBufferData(GL_TEXTURE_BUFFER, m_dirBuffer.size()*sizeof(ngl::Vec3), &m_dirBuffer[0].m_x, GL_DYNAMIC_DRAW);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), &m_posZ[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[2]);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), &m_dirX[0], GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[3]);
+    glBufferData(GL_TEXTURE_BUFFER, m_numParticles*sizeof(f256), &m_dirZ[0], GL_DYNAMIC_DRAW);
 
-  }  
+
+}  
