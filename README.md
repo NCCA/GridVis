@@ -21,7 +21,7 @@ CPU SOA Draw 240uS Update 9150uS
 Texel Fetch Draw 56uS Buffer Update 300uS Sim Update 9800uS 
 Threaded Update Draw 56uS Buffer Update 300uS Sim Update 2820uS
 TBB Update Draw 56uS Buffer Update 300uS Sim Update 2800uS 
-SIMD Update Draw 62uS Buffer Update 2200uS Sim Update 930uS   
+SIMD Update Draw 62uS Buffer Update 1800uS Sim Update 930uS   
 
 ## [CPUOnly](CPUOnly/)
 

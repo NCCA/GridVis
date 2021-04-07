@@ -323,22 +323,29 @@ void Grid::checkForBounds(size_t _i) noexcept
 
   void Grid::updateTextureBuffer()
   {
-
+    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
+    ngl::Vec3 *posBuffer=(ngl::Vec3 *)glMapBuffer(GL_TEXTURE_BUFFER,GL_READ_WRITE);
+    
     size_t index=0;
     for(size_t i=0; i<m_numParticles*8; i+=8)
     {
-      m_pos[index].fillArray(&m_posBuffer[i]);
-      m_dir[index++].fillArray(&m_dirBuffer[i]);
+      m_pos[index++].fillArray(posBuffer);
+      posBuffer+=8;
     }
+    glUnmapBuffer(GL_TEXTURE_BUFFER);
 
-
-    // update this buffer by copying the data to it
-    glActiveTexture( GL_TEXTURE0 );
-    glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
-    glBufferData(GL_TEXTURE_BUFFER, m_posBuffer.size()*sizeof(ngl::Vec3), &m_posBuffer[0].m_x, GL_DYNAMIC_DRAW);
-    // update this buffer by copying the data to it
-    glActiveTexture( GL_TEXTURE1 );
     glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[1]);
-    glBufferData(GL_TEXTURE_BUFFER, m_dirBuffer.size()*sizeof(ngl::Vec3), &m_dirBuffer[0].m_x, GL_DYNAMIC_DRAW);
+
+    ngl::Vec3 *dirBuffer=(ngl::Vec3 *)glMapBuffer(GL_TEXTURE_BUFFER,GL_READ_WRITE);
+
+    index=0;
+    for(size_t i=0; i<m_numParticles*8; i+=8)
+    {
+      m_dir[index++].fillArray(dirBuffer);
+      dirBuffer+=8;
+    }
+    glUnmapBuffer(GL_TEXTURE_BUFFER);
+
+
 
   }  
