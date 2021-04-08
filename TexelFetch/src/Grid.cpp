@@ -127,12 +127,8 @@ void Grid::createTextureBuffer()
 
 void Grid::updateTextureBuffer()
 {
-  // update this buffer by copying the data to it
-  glActiveTexture( GL_TEXTURE0 );
   glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[0]);
   glBufferData(GL_TEXTURE_BUFFER, m_pos.size()*sizeof(ngl::Vec3), &m_pos[0].m_x, GL_DYNAMIC_DRAW);
-  // update this buffer by copying the data to it
-  glActiveTexture( GL_TEXTURE1 );
   glBindBuffer(GL_TEXTURE_BUFFER, m_tbo[1]);
   glBufferData(GL_TEXTURE_BUFFER, m_dir.size()*sizeof(ngl::Vec3), &m_dir[0].m_x, GL_DYNAMIC_DRAW);
 
