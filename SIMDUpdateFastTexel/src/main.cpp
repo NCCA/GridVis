@@ -26,7 +26,7 @@ int main(int argc, char **argv)
   QSurfaceFormat format;
   // set the number of samples for multisampling
   // will need to enable glEnable(GL_MULTISAMPLE); once we have a context
-  format.setSamples(4);
+  format.setSamples(8);
   #if defined(__APPLE__)
     // at present mac osx Mountain Lion only supports GL3.2
     // the new mavericks will have GL 4.x so can change

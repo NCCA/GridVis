@@ -36,7 +36,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective( 65.0f, static_cast<float>( _w ) / _h, 1.0f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
   m_text->setScreenSize(_w,_h);
@@ -67,7 +67,7 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
 	// set the shape using FOV 45 Aspect Ratio based on Width and Height
 	// The final two are near and far clipping planes of 0.5 and 10
-  m_project=ngl::perspective(45,1024.0f/720.0f,0.01f,150);
+  m_project=ngl::perspective(65,1024.0f/720.0f,1.0f,350.0f);
 
 // now to load the shader and set the values
 	// grab an instance of shader manager
@@ -116,7 +116,7 @@ void NGLScene::paintGL()
   MVP=m_project*m_view*m_mouseGlobalTX;
 
   ngl::ShaderLib::setUniform("MVP",MVP);
-  glPointSize(20);
+  glPointSize(12);
   
   auto updateTbufferbegin = std::chrono::steady_clock::now();
   m_grid->updateTextureBuffer();
@@ -135,7 +135,7 @@ void NGLScene::paintGL()
  
  
   auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
-  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_grid->getNumParticles());
+  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_grid->getNumParticles()*8);
   m_text->renderText(10,640,text );
   
   ngl::ShaderLib::use(ngl::nglColourShader);
@@ -243,14 +243,13 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_F : showFullScreen(); break;
   // show windowed
   case Qt::Key_N : showNormal(); break;
-  case Qt::Key_Space : m_update^=false; break;
+  case Qt::Key_Space : m_update^=true; break;
   
 
   default : break;
   }
-  // finally update the GLWindow and re-draw
-  //if (isExposed())
-    update();
+  
+  update();
 }
 
 void NGLScene::timerEvent(QTimerEvent *)

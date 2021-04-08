@@ -111,6 +111,7 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     std::unique_ptr<ngl::Text> m_text;
     std::deque<long> m_updateTime;
+    bool m_update=true;
 
 
 };

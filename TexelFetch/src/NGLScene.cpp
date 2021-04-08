@@ -35,7 +35,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective( 65.0f, static_cast<float>( _w ) / _h, 1.0f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
   m_text->setScreenSize(_w,_h);
@@ -66,7 +66,7 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
 	// set the shape using FOV 45 Aspect Ratio based on Width and Height
 	// The final two are near and far clipping planes of 0.5 and 10
-  m_project=ngl::perspective(45,1024.0f/720.0f,0.01f,150);
+  m_project=ngl::perspective(65,1024.0f/720.0f,1.0f,350);
 
 // now to load the shader and set the values
 	// grab an instance of shader manager

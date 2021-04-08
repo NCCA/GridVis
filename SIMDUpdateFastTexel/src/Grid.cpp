@@ -35,6 +35,7 @@
 
   void Grid::draw() const
   {
+    glBindVertexArray(m_svao);
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture(GL_TEXTURE_BUFFER,m_posXBufferID);
     glActiveTexture( GL_TEXTURE1 );
@@ -44,7 +45,7 @@
     glBindTexture(GL_TEXTURE_BUFFER,m_dirXBufferID);
     glActiveTexture( GL_TEXTURE3 );
     glBindTexture(GL_TEXTURE_BUFFER,m_dirZBufferID);
-    glBindVertexArray(m_svao);
+    
     glDrawArrays(GL_POINTS,0,m_numParticles*8);      
   }
 

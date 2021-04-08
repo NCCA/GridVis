@@ -44,7 +44,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
          ${PROJECT_SOURCE_DIR}/include/Grid.h 
          ${PROJECT_SOURCE_DIR}/include/simd.h 
-         ${PROJECT_SOURCE_DIR}/include/AlignedUniqueptr.h 
+         ${PROJECT_SOURCE_DIR}/include/AlignedArray.h 
 )
 add_compile_definitions(GL_SILENCE_DEPRECATION)
 target_link_libraries(${TargetName} PRIVATE  NGL Qt5::Widgets TBB::tbb)
