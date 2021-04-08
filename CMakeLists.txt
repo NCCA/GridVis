@@ -18,4 +18,5 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/TBBThreadedUpdate/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/ComputeShaderUpdate/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/Vec3x8Tests/ )
 add_subdirectory(${PROJECT_SOURCE_DIR}/SIMDUpdate/ )
+add_subdirectory(${PROJECT_SOURCE_DIR}/SIMDUpdateFastTexel/ )
 
