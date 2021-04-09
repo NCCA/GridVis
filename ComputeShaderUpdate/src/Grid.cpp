@@ -7,15 +7,22 @@
 #include <ngl/SimpleVAO.h>
 #include <ngl/ShaderLib.h>
 
+unsigned int roundTo(unsigned int value, unsigned int roundTo)
+{
+    return (value + (roundTo - 1)) & ~(roundTo - 1);
+}
+
 Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles) 
 {
     m_width=_w;
     m_height=_h;
-    m_numParticles=_numParticles;
+
+    m_numParticles=roundTo(_numParticles,128);
     initGrid();
     // Going to use a non NGL buffer see if it is quicker
     glGenVertexArrays(1, &m_svao);
     glBindVertexArray(m_svao);
+    // Bind the Shader Storage Buffers we created earlier.
     glBindBuffer(GL_ARRAY_BUFFER, m_ssbo[0]);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
@@ -53,10 +60,10 @@ void Grid::initGrid()
     m_posAccel[i].m_x=ngl::Random::randomNumber(m_width/2.0f);
     m_posAccel[i].m_z=ngl::Random::randomNumber(m_height/2.0f);
     m_posAccel[i].m_y=0.0f; // just in case!
-    m_posAccel[i].m_w= ngl::Random::randomPositiveNumber(5) + 0.1f;
+    m_posAccel[i].m_w= ngl::Random::randomPositiveNumber(5) + 0.5f;
     m_dirSpeed[i] = ngl::Random::getRandomVec3()*2.0f;  
     m_dirSpeed[i].m_y=0.0f; // this needs to be done as reflect is 3d
-    m_dirSpeed[i].m_w=ngl::Random::randomPositiveNumber(5)+0.1f;  
+    m_dirSpeed[i].m_w=ngl::Random::randomPositiveNumber(5)+0.5f;  
   }
 
   glGenBuffers(2, &m_ssbo[0]);

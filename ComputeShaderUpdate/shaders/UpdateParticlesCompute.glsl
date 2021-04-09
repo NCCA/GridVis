@@ -6,6 +6,7 @@ layout (local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 layout (std430, binding = 0) buffer PositionBuffer
 {
   vec4 positions[]; // w is Accel
+
 };
 layout (std430, binding = 1) buffer DirBuffer
 {
@@ -38,32 +39,32 @@ void main()
   if(positions[index].x <= -xsize)
   {
     directions[index].xyz= reflect(directions[index].xyz,vec3(1.0f,0.0f,0.0f));
-    directions[index].w-=0.1f;
+    //directions[index].w-=0.1f;
   }
   // right plane
   else if(positions[index].x >= xsize)
   {
     directions[index].xyz= reflect(directions[index].xyz,vec3(-1.0f,0.0f,0.0f));
-    directions[index].w-=0.1f;
+    //directions[index].w-=0.1f;
   }
   // // top plane
   if(positions[index].z >= zsize)
   {
     directions[index].xyz=reflect(directions[index].xyz,vec3(0.0f,0.0f,1.0f));
-    directions[index].w-=0.1f;
+    //directions[index].w-=0.1f;
   }
   // bottom plane
   else if(positions[index].z <= -zsize)
   {
     directions[index].xyz= reflect(directions[index].xyz,vec3(0.0f,0.0f,-1.0f));
-    directions[index].w-=0.1f;
+  //  directions[index].w-=0.1f;
   }
 
 
-  if(directions[index].w <= 0.0)
-  {
-    directions[index].w=2.0*rand(vec2(xsize,zsize));
-  }
+  // if(directions[index].w <= 0.0)
+  // {
+  //   directions[index].w=2.0*rand(vec2(xsize,zsize);
+  // }
 
 
 }
