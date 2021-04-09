@@ -32,7 +32,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective( 65.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
   m_text->setScreenSize(_w,_h);
@@ -63,15 +63,13 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
 	// set the shape using FOV 45 Aspect Ratio based on Width and Height
 	// The final two are near and far clipping planes of 0.5 and 10
-  m_project=ngl::perspective(45,1024.0f/720.0f,0.01f,150);
+  m_project=ngl::perspective(65,1024.0f/720.0f,0.01f,150);
 
 // now to load the shader and set the values
 	// grab an instance of shader manager
 	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
   ngl::ShaderLib::use("PosDir");
-  ngl::ShaderLib::setUniform("posSampler",0);
-  ngl::ShaderLib::setUniform("dirSampler", 1);
- glViewport(0,0,width(),height());
+  glViewport(0,0,width(),height());
   m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
   ngl::ShaderLib::use(ngl::nglColourShader);
@@ -87,8 +85,9 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::compileShader("Compute");
   ngl::ShaderLib::attachShaderToProgram(ComputeShader, "Compute");
   ngl::ShaderLib::linkProgramObject(ComputeShader);
-
-
+  ngl::ShaderLib::use(ComputeShader);
+  ngl::ShaderLib::setUniform("xsize",m_gridWidth/2.0f);
+  ngl::ShaderLib::setUniform("zsize",m_gridHeight/2.0f);
   startTimer(20);
 }
 
@@ -126,7 +125,7 @@ void NGLScene::paintGL()
   
   std::string text=fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count());
   m_text->renderText(10,680,text );
-  text=fmt::format("Update took {0} uS",m_updateTime);
+  text=fmt::format("Update took {0} uS for {1} particles",m_updateTime,m_grid->getNumParticles());
   m_text->renderText(10,660,text );
   
   ngl::ShaderLib::use(ngl::nglColourShader);

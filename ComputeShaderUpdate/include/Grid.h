@@ -10,25 +10,16 @@ class Grid
         Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
         void draw() const;
         void update(float _dt);
+        uint32_t getNumParticles() const {return m_numParticles;}
 
     private :
         void initGrid();
-        void resetParticle(size_t i);
-        void createTextureBuffer();
-        void updateTextureBuffer();
         GLuint m_ssbo[2];
-        GLuint m_posBufferID;
-        GLuint m_dirBufferID;
         uint32_t m_width;
         uint32_t m_height;
         uint32_t m_numParticles;
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
-        GLuint m_vboID;
-        std::vector<ngl::Vec4> m_posAccel;
-        std::vector<ngl::Vec4> m_dirSpeed;
-
-
 
 };
 
