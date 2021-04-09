@@ -13,10 +13,10 @@
 #include <fmt/format.h>
 
 constexpr size_t c_sampleSize=500;
- 
+
 NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
 {
-  setTitle("Qt5 Simple NGL Demo");
+  setTitle("Grid Simulation using SIMD and Threads for Update");
   m_gridWidth=_w;
   m_gridHeight=_h;
   m_numParticles=_numParticles;
@@ -36,7 +36,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_project=ngl::perspective(65,static_cast<float>(_w)/_h,1.0f,350.0f);
+  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
   m_text->setScreenSize(_w,_h);
@@ -67,7 +67,7 @@ void NGLScene::initializeGL()
   m_view=ngl::lookAt(from,to,up);
 	// set the shape using FOV 45 Aspect Ratio based on Width and Height
 	// The final two are near and far clipping planes of 0.5 and 10
-  m_project=ngl::perspective(65,1024.0f/720.0f,1.0f,350.0f);
+  m_project=ngl::perspective(45,1024.0f/720.0f,0.01f,150);
 
 // now to load the shader and set the values
 	// grab an instance of shader manager
@@ -114,17 +114,27 @@ void NGLScene::paintGL()
   MVP=m_project*m_view*m_mouseGlobalTX;
 
   ngl::ShaderLib::setUniform("MVP",MVP);
-  glPointSize(20);
+  glPointSize(8);
+  
+  auto updateTbufferbegin = std::chrono::steady_clock::now();
+  m_grid->updateTextureBuffer();
+  auto updateTbufferEnd = std::chrono::steady_clock::now();
+  
   auto drawbegin = std::chrono::steady_clock::now();
-
+  
   m_grid->draw();
   auto drawend = std::chrono::steady_clock::now();
   
   std::string text=fmt::format("Draw took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (drawend - drawbegin).count());
   m_text->renderText(10,680,text );
-  auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
-  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_numParticles);
+ 
+  text=fmt::format("Texture Buffer Update took {0} uS",std::chrono::duration_cast<std::chrono::microseconds> (updateTbufferEnd - updateTbufferbegin).count());
   m_text->renderText(10,660,text );
+ 
+ 
+  auto updateTime = std::accumulate(std::begin(m_updateTime),std::end(m_updateTime),0) / m_updateTime.size() ;
+  text=fmt::format("Update took {0} uS for {1} particles",updateTime,m_grid->getNumParticles());
+  m_text->renderText(10,640,text );
   
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("MVP",MVP);
@@ -231,6 +241,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_F : showFullScreen(); break;
   // show windowed
   case Qt::Key_N : showNormal(); break;
+  case Qt::Key_Space : m_update^=true; break;
 
   
 
@@ -243,6 +254,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
 void NGLScene::timerEvent(QTimerEvent *)
 {
+  if(m_update == false) return;
   auto updatebegin = std::chrono::steady_clock::now();
   m_grid->update(0.01f);
   auto updateend = std::chrono::steady_clock::now();

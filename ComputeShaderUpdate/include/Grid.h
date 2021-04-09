@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include <ngl/AbstractVAO.h>
-#include <ngl/Vec3.h>
+#include <ngl/Vec4.h>
 class Grid
 {
     public :
@@ -16,7 +16,7 @@ class Grid
         void resetParticle(size_t i);
         void createTextureBuffer();
         void updateTextureBuffer();
-        GLuint m_tbo[2];
+        GLuint m_ssbo[2];
         GLuint m_posBufferID;
         GLuint m_dirBufferID;
         uint32_t m_width;
@@ -25,10 +25,8 @@ class Grid
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
         GLuint m_vboID;
-        std::vector<ngl::Vec3> m_pos;
-        std::vector<ngl::Vec3> m_dir;
-        std::vector<float> m_acceleration;
-        std::vector<float> m_maxspeed;
+        std::vector<ngl::Vec4> m_posAccel;
+        std::vector<ngl::Vec4> m_dirSpeed;
 
 
 

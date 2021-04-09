@@ -39,7 +39,7 @@ void NGLScene::resizeGL( int _w, int _h )
 
 }
 
-
+constexpr auto ComputeShader = "ComputeShader";
 void NGLScene::initializeGL()
 {
   // we need to initialise the NGL lib which will load all of the OpenGL functions, this must
@@ -70,16 +70,24 @@ void NGLScene::initializeGL()
 	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
   ngl::ShaderLib::use("PosDir");
   ngl::ShaderLib::setUniform("posSampler",0);
-  ngl::ShaderLib::setUniform("dirSampler",1);
-  
-  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
-	glViewport(0,0,width(),height());
+  ngl::ShaderLib::setUniform("dirSampler", 1);
+ glViewport(0,0,width(),height());
   m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
   m_text=std::make_unique<ngl::Text>("fonts/Arial.ttf",18);
   m_text->setColour(1.0f,1.0f,0.0f);
+
+  // load the Compute Shader
+  
+  ngl::ShaderLib::createShaderProgram(ComputeShader);
+  ngl::ShaderLib::attachShader("Compute", ngl::ShaderType::COMPUTE);
+  ngl::ShaderLib::loadShaderSource("Compute", "shaders/UpdateParticlesCompute.glsl");
+  ngl::ShaderLib::compileShader("Compute");
+  ngl::ShaderLib::attachShaderToProgram(ComputeShader, "Compute");
+  ngl::ShaderLib::linkProgramObject(ComputeShader);
+
 
   startTimer(20);
 }
