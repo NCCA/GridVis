@@ -15,7 +15,7 @@
 
 NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
 {
-  setTitle("Qt5 Simple NGL Demo");
+  setTitle("Particle Update Using Compute Shaders");
   m_gridWidth=_w;
   m_gridHeight=_h;
   m_numParticles=_numParticles;
@@ -233,6 +233,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
   case Qt::Key_F : showFullScreen(); break;
   // show windowed
   case Qt::Key_N : showNormal(); break;
+  case Qt::Key_Space : m_update^=true; break;
 
   
 
@@ -245,6 +246,7 @@ void NGLScene::keyPressEvent(QKeyEvent *_event)
 
 void NGLScene::timerEvent(QTimerEvent *)
 {
+  if (m_update == false )return;
   auto updatebegin = std::chrono::steady_clock::now();
   m_grid->update(0.01f);
   auto updateend = std::chrono::steady_clock::now();
