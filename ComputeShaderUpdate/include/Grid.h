@@ -7,7 +7,7 @@
 class Grid
 {
     public :
-        Grid(uint32_t _w, uint32_t _h,size_t _numParticles);
+        Grid(uint32_t _w, uint32_t _h,size_t _numParticles,int _groupSize);
         void draw() const;
         void update(float _dt);
         uint32_t getNumParticles() const {return m_numParticles;}
@@ -20,6 +20,7 @@ class Grid
         uint32_t m_numParticles;
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
+        int m_groupSize;
 
 };
 

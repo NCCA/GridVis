@@ -111,6 +111,7 @@ private:
     std::unique_ptr<ngl::Text> m_text;
     long m_updateTime;
     bool m_update=true;
+    GLint m_group;
 
 
 

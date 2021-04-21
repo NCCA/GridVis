@@ -70,7 +70,6 @@ void NGLScene::initializeGL()
 	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
   ngl::ShaderLib::use("PosDir");
   glViewport(0,0,width(),height());
-  m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
   ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
@@ -89,6 +88,10 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::setUniform("xsize",m_gridWidth/2.0f);
   ngl::ShaderLib::setUniform("zsize",m_gridHeight/2.0f);
   startTimer(20);
+
+  glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE,0,&m_group);
+  m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles,m_group);
+  std::cout<<"Work group size "<<m_group<<'\n';
 }
 
 
