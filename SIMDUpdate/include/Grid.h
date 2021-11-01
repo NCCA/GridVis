@@ -36,10 +36,15 @@ class Grid
         
         std::vector<ngl::Vec3> m_posBuffer;
         std::vector<ngl::Vec3> m_dirBuffer;
-        std::vector<__m256> m_acceleration; // float[8]
-        std::vector<__m256> m_maxspeed; // float [8]
-
-
+        #ifdef __x86_64__
+            std::vector<__m256> m_acceleration; // float[8]
+            std::vector<__m256> m_maxspeed; // float [8]
+        #elif defined(__arm64__) // use neon here
+            std::vector<__m128> m_acceleration; // float[4]
+            std::vector<__m128> m_maxspeed; // float [4]
+        #else
+            #error Intrinsics not defined
+        #endif
 
 };
 

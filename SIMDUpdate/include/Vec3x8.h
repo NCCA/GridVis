@@ -5,6 +5,7 @@
 // This is minimal for this demo and can be improved to a full featured version if 
 // needed
 
+#ifdef __x86_64__
 #ifdef _MSC_VER
 // visual C++ only sets AVX2 flag :(
 # ifndef __AVX2__
@@ -16,8 +17,10 @@
 # endif
 #endif
 
-
-#include <immintrin.h>
+ #include <immintrin.h>
+#else   
+ #include "sse2neon.h"
+#endif
 #include <cstdint>
 #include <ngl/Vec3.h>
 #if defined(_MSC_VER)
