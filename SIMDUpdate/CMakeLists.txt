@@ -36,6 +36,7 @@ find_package(TBB CONFIG REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
+add_definitions(-Wfatal-errors)
 # Set the name of the executable we want to build
 add_executable(${TargetName})
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -44,16 +45,29 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
    target_compile_options(${TargetName} PRIVATE /arch:AVX2)
 endif()
 
+include(CheckCCompilerFlag)
+set(CMAKE_REQUIRED_LINK_OPTIONS "-arch;arm64")
+check_c_compiler_flag("-arch arm64" arm64Supported)
+message("arm64Supported=${arm64Supported}")
+
 # Add NGL include path
 include_directories(include $ENV{HOME}/NGL/include)
 target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
 			${PROJECT_SOURCE_DIR}/src/Grid.cpp  
-            ${PROJECT_SOURCE_DIR}/src/Vec3x8.cpp   
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
             ${PROJECT_SOURCE_DIR}/include/Grid.h             
-            ${PROJECT_SOURCE_DIR}/include/Vec3x8.h             
 )
+
+if(${arm64Supported} )
+    target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/Vec3x4.cpp  
+    ${PROJECT_SOURCE_DIR}/include/Vec3x4.h             )
+else()
+    target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/Vec3x8.cpp  
+    ${PROJECT_SOURCE_DIR}/include/Vec3x8.h )
+
+endif()
+
 add_compile_definitions(GL_SILENCE_DEPRECATION)
 target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets  Qt::OpenGL TBB::tbb)
 

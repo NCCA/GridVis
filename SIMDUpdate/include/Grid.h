@@ -4,7 +4,13 @@
 #include <cstdint>
 #include <ngl/AbstractVAO.h>
 #include <ngl/Vec3.h>
-#include "Vec3x8.h"
+#if defined(__x86_64__)
+    #include "Vec3x8.h"
+#elif defined(__arm64__)
+    #include "Vec3x4.h"
+#else
+    error "Undefined SIMD architecture"
+#endif
 class Grid
 {
     public :
@@ -31,8 +37,13 @@ class Grid
         std::unique_ptr<ngl::AbstractVAO> m_vao;
         GLuint m_svao;
         GLuint m_vboID;
-        std::vector<Vec3x8> m_pos;
-        std::vector<Vec3x8> m_dir;
+        #if defined(__x86_64__)
+            std::vector<Vec3x8> m_pos;
+            std::vector<Vec3x8> m_dir;
+        #elif defined(__arm64__)
+            std::vector<Vec3x4> m_pos;
+            std::vector<Vec3x4> m_dir;
+        #endif
         
         std::vector<ngl::Vec3> m_posBuffer;
         std::vector<ngl::Vec3> m_dirBuffer;
