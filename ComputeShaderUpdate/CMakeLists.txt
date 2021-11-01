@@ -22,7 +22,15 @@ find_package(NGL CONFIG REQUIRED)
 # Instruct CMake to run moc automatically when needed (Qt projects only)
 set(CMAKE_AUTOMOC ON)
 # find Qt libs
-find_package(Qt5Widgets)
+# find Qt libs first we check for Version 6
+find_package(Qt6 COMPONENTS OpenGL Widgets QUIET )
+if ( Qt6_FOUND )
+    message("Found Qt6 Using that")
+else()
+    message("Found Qt5 Using that")
+    find_package(Qt5 COMPONENTS OpenGL Widgets REQUIRED)
+endif()
+
 find_package(TBB CONFIG REQUIRED)
 
 # use C++ 17
@@ -41,7 +49,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
             ${PROJECT_SOURCE_DIR}/include/Grid.h             
 )
 add_compile_definitions(GL_SILENCE_DEPRECATION)
-target_link_libraries(${TargetName} PRIVATE  NGL Qt5::Widgets TBB::tbb)
+target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL TBB::tbb)
 
 add_custom_target(${TargetName}CopyShaders ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
