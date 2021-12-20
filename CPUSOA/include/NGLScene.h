@@ -1,6 +1,5 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
-#include <ngl/AbstractVAO.h>
 #include <ngl/Mat4.h>
 #include <ngl/Vec3.h>
 #include "WindowParams.h"

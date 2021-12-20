@@ -17,7 +17,7 @@ Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles)
     m_acceleration.resize(m_numParticles);
     m_maxspeed.resize(m_numParticles);
     initGrid();
-    m_vao=ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS);
+    m_vao=ngl::vaoFactoryCast<ngl::MultiBufferVAO>(   ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS));
     m_vao->bind();
     m_vao->setData(ngl::MultiBufferVAO::VertexData(m_pos.size()*sizeof(ngl::Vec3),m_pos[0].m_x));
     m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);

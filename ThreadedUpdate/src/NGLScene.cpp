@@ -74,8 +74,10 @@ void NGLScene::initializeGL()
   ngl::ShaderLib::use("PosDir");
   ngl::ShaderLib::setUniform("posSampler",0);
   ngl::ShaderLib::setUniform("dirSampler",1);
-  
-  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("baseThickness",4.0f);
+  ngl::ShaderLib::setUniform("pointThickness",1.0f);
+  ngl::ShaderLib::setUniform("viewportSize",ngl::Vec2(width(),height()));
+
 	glViewport(0,0,width(),height());
   m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);

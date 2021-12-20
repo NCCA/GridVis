@@ -4,8 +4,6 @@
 #include "NGLScene.h"
 #include <ngl/Transformation.h>
 #include <ngl/NGLInit.h>
-#include <ngl/VAOFactory.h>
-#include <ngl/SimpleVAO.h>
 #include <ngl/ShaderLib.h>
 #include <ngl/Vec2.h>
 #include <ngl/Random.h>
@@ -72,7 +70,11 @@ void NGLScene::initializeGL()
 	// grab an instance of shader manager
 	ngl::ShaderLib::loadShader("PosDir","shaders/PosDirVertex.glsl","shaders/PosDirFragment.glsl","shaders/PosDirGeo.glsl");
   ngl::ShaderLib::use("PosDir");
-  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("baseThickness",4.0f);
+  ngl::ShaderLib::setUniform("pointThickness",1.0f);
+  ngl::ShaderLib::setUniform("viewportSize",ngl::Vec2(width(),height()));
+
+
 	glViewport(0,0,width(),height());
   m_grid= std::make_unique<Grid>(m_gridWidth,m_gridHeight,m_numParticles);
   ngl::VAOPrimitives::createLineGrid("lineGrid",m_gridWidth,m_gridHeight,2);
@@ -111,8 +113,8 @@ void NGLScene::paintGL()
   MVP=m_project*m_view*m_mouseGlobalTX;
 
   ngl::ShaderLib::setUniform("MVP",MVP);
-  glPointSize(20);
-    
+  ngl::ShaderLib::setUniform("viewportSize",ngl::Vec2(width(),height()));
+  
   auto drawbegin = std::chrono::steady_clock::now();
   
   m_grid->draw();

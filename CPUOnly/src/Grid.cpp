@@ -11,7 +11,12 @@ Grid::Grid(uint32_t _w, uint32_t _h,size_t _numParticles)
     m_height=_h;
     m_particles.resize(_numParticles);
     initGrid();
-    m_vao=ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS);
+    m_vao=ngl::vaoFactoryCast<ngl::MultiBufferVAO>(   ngl::VAOFactory::createVAO(ngl::multiBufferVAO,GL_POINTS));
+    m_vao->bind();
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(0,0)); // index 0 points
+    m_vao->setData(ngl::MultiBufferVAO::VertexData(0,0)); // index 1 dirs
+    m_vao->unbind();
+    
   }
 
 void Grid::draw() const
@@ -27,10 +32,10 @@ void Grid::draw() const
   m_vao->bind();
 
   // in this case we are going to set our data as the vertices above
-  m_vao->setData(ngl::MultiBufferVAO::VertexData(parts.size()*sizeof(ngl::Vec3),parts[0].m_x));
+  m_vao->setData(0,ngl::MultiBufferVAO::VertexData(parts.size()*sizeof(ngl::Vec3),parts[0].m_x));
   // now we set the attribute pointer to be 0 (as this matches vertIn in our shader)
   m_vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
-  m_vao->setData(ngl::MultiBufferVAO::VertexData(dirs.size()*sizeof(ngl::Vec3),dirs[0].m_x));
+  m_vao->setData(1,ngl::MultiBufferVAO::VertexData(dirs.size()*sizeof(ngl::Vec3),dirs[0].m_x));
   m_vao->setVertexAttributePointer(1,3,GL_FLOAT,0,0);
   m_vao->setNumIndices(parts.size());
 
@@ -86,7 +91,7 @@ void Grid::resetParticle(Particle &io_p)
     io_p.pos.m_x=ngl::Random::randomNumber(m_width/2.0f);
     io_p.pos.m_z=ngl::Random::randomNumber(m_height/2.0f);
     io_p.pos.m_y=0.0f; // just in case!
-    io_p.dir = ngl::Random::getRandomVec3()*2.0f;  
+    io_p.dir = ngl::Random::getRandomVec3()*5.0f;  
     io_p.dir.m_y=0.0f; // this needs to be done as reflect is 3d
     io_p.maxspeed=ngl::Random::randomPositiveNumber(5)+0.1f;  
     io_p.acceleration=ngl::Random::randomPositiveNumber(5)+0.1f;

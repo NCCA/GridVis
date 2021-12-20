@@ -2,7 +2,7 @@
 #define GRID_H_
 #include <vector>
 #include <cstdint>
-#include <ngl/AbstractVAO.h>
+#include <ngl/MultiBufferVAO.h>
 #include <ngl/Vec3.h>
 class Grid
 {
@@ -19,7 +19,7 @@ class Grid
         uint32_t m_width;
         uint32_t m_height;
         uint32_t m_numParticles;
-        std::unique_ptr<ngl::AbstractVAO> m_vao;
+        std::unique_ptr<ngl::MultiBufferVAO> m_vao;
         GLuint m_svao;
         GLuint m_vboID;
         std::vector<ngl::Vec3> m_pos;

@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 #include "Particle.h"
-#include <ngl/AbstractVAO.h>
+#include <ngl/MultiBufferVAO.h>
 
 
 class Grid
@@ -19,7 +19,7 @@ class Grid
         uint32_t m_width;
         uint32_t m_height;
         std::vector<Particle> m_particles;
-        std::unique_ptr<ngl::AbstractVAO> m_vao;
+        std::unique_ptr<ngl::MultiBufferVAO> m_vao;
 
 
 };
