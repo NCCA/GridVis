@@ -1,7 +1,7 @@
 #version 400 core
 
 uniform mat4 MVP;
-flat out vec3 dir;
+out vec3 dir;
 uniform samplerBuffer posSampler;
 uniform samplerBuffer dirSampler;
 
