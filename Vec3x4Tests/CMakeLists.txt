@@ -26,6 +26,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Set the name of the executable we want to build
 add_executable(${TargetName})
 find_package(GTest CONFIG REQUIRED)
+# bug in gtest cmake may cause issues so this is set
 include(GoogleTest)
 enable_testing()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
