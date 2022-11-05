@@ -49,7 +49,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
 add_compile_definitions(GL_SILENCE_DEPRECATION)
 target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL Qt::Concurrent)
 
-add_custom_target(${TargetName}CopyShaders ALL
+add_custom_target(${TargetName}CopyShadersAndFonts ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders
     $<TARGET_FILE_DIR:${TargetName}>/shaders
