@@ -11,6 +11,7 @@
 #include <ngl/Random.h>
 #include <chrono>
 #include <fmt/format.h>
+#include <iostream>
 
 constexpr size_t c_sampleSize = 500;
 

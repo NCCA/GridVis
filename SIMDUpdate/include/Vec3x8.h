@@ -26,11 +26,11 @@
 #if defined(_MSC_VER)
 #define ALIGNED(x) __declspec(align(x))
 #else
-#if defined(__GNUC__)
+#if defined(__GNUC__) or deinfed(DARWIN)
 #define ALIGNED(x) __attribute__((aligned(x)))
 #define __vectorcall
-
 #endif
+
 #endif
 class Vec3x8
 {

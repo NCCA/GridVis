@@ -30,7 +30,7 @@
 #else
 #if defined(__GNUC__)
 #define ALIGNED(x) __attribute__((aligned(x)))
-#define __vectorcall ""
+#define __vectorcall
 #endif
 #endif
 class Vec3x4
