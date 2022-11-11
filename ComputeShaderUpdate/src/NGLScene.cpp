@@ -11,6 +11,7 @@
 #include <ngl/Random.h>
 #include <chrono>
 #include <fmt/format.h>
+#include <iostream>
 
 NGLScene::NGLScene(uint32_t _w, uint32_t _h, uint32_t _numParticles)
 {
