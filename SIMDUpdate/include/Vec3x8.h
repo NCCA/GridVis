@@ -26,7 +26,7 @@
 #if defined(_MSC_VER)
 #define ALIGNED(x) __declspec(align(x))
 #else
-#if defined(__GNUC__) or deinfed(DARWIN)
+#if defined(__GNUC__)
 #define ALIGNED(x) __attribute__((aligned(x)))
 #define __vectorcall
 #endif
