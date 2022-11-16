@@ -13,7 +13,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE AND DEFINED ENV{CMAKE_TOOLCHAIN_FILE})
 endif()
 
 # Name of the project
-project(TexelFetchBuild)
+project(TexelFetchGridBuild)
 # This is the name of the Exe change this and it will change everywhere
 set(TargetName TexelFetch)
 # This will include the file NGLConfig.cmake, you need to add the location to this either using
